@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            height: 10vh;
+        }
+        section {
+            height: 80vh;
+            width: 100%;
+            display: flex;
+        }
+
+        section>div {
+            border: 1px solid grey;
+        }
+
+        #qiniu_tm_leftpanel {
+            width: 70%;
+            padding: 2rem;
+        }
+
+        #qiniu_tm_img {
+            width: 100%;
+        }
+
+        #qiniu_tm_rightpanel {
+            width: 30%;
+        }
+
+        footer {
+            height: 10vh;
+        }
+    </style>
+</head>
+<body>
+    <header></header>
+    <section>
+        <div id="qiniu_tm_leftpanel">
+            <img id="qiniu_tm_img" src="" alt="">
+        </div>
+        <div id="qiniu_tm_rightpanel">
+            <input type="file" id="qiniu_tm_imgselector" />
+            <button id="qiniu_tm_classify_submit">分类</button>
+            <button id="qiniu_tm_recog_submit">识别</button>
+        </div>
+    </section>
+    <footer></footer>
+
+    <script>
+        document.querySelector('#qiniu_tm_imgselector').addEventListener('change', function(e) {
+            let imgURL = window.URL.createObjectURL(e.target.files[0]);
+            document.querySelector('#qiniu_tm_img').src = imgURL;
+        });
+
+        document.querySelector('#qiniu_tm_classify_submit').addEventListener('click', function(e) {
+            let imgURL = window.URL.createObjectURL(document.querySelector('#qiniu_tm_imgselector').files[0]);
+            let img = new Image();
+            img.src = imgURL;
+            img.onload = function() {
+                let data = getBase64Image(img);
+                // console.log(data);
+                let postBody = {
+                    headers: { 
+                        "Content-Type": "application/json"
+                    },
+                    method: 'POST',
+                    body: JSON.stringify({
+                        data: [1,2]
+                    })
+                }
+
+                fetch('https://100.100.6.150:1111/post', postBody).then(e => e.json()).then(e => console.log(e));
+            }
+        });
+    
+        
+
+        function getBase64Image(img) {
+            var canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            var dataURL = canvas.toDataURL("image/png");
+            return dataURL
+
+            // return dataURL.replace("data:image/png;base64,", "");
+        }
+    </script>
+</body>
+</html>

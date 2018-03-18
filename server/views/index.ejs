@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+    <title>Document</title>
+    <link rel="stylesheet" href="./stylesheet/index.css">
+    <link rel="stylesheet" href="./libs/css/bootstrap.min.css">
+</head>
+<body>
+    <div id="qiniu_tm_success_alert" class="alert alert-success qiniu-tm-hidden" role="alert">
+        Upload Success!
+    </div>
+    <div id="qiniu_tm_fail_alert" class="alert alert-danger qiniu-tm-hidden" role="alert">
+        Upload Failed!
+    </div>
+    <header>
+        <p>平安票据模版定制系统</p>
+    </header>
+    <section class="container-fluid">
+        <div class="row">
+            <div id='qiniu_tm_leftpanel' class="col-9">
+                <div id="qiniu_tm_listcontainer">
+                    <p>新建样本票据：</p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="qiniu_tm_templatename">票据模版名称</label>
+                        </div>
+                        <input id="qiniu_tm_templatename" type="text" class="form-control" />
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id='qiniu_tm_imgselector' ／>
+                            <label class="custom-file-label" for="qiniu_tm_imgselector">选择票据样张</label>
+                        </div>
+                    </div>
+                    <br />
+                    <p>
+                        当前已标注的票据:
+                    </p>
+                    <div id="qiniu_tm_listcontainer_list" class="list-group">
+                        <ul class="list-group"></ul>
+                    </div>
+                </div>
+                <div id='qiniu_tm_imgcontainer'>
+                    <div>
+                        <!-- <canvas id='qiniu_tm_canvas'></canvas> -->
+                        <img id='qiniu_tm_img' src='' alt=''>
+                        <svg id='qiniu_tm_imgmarker' xmlns='http://www.w3.org/2000/svg' version='1.1'></svg>
+                    </div>
+                </div>
+            </div>
+        
+            <div id='qiniu_tm_rightpanel' class="col-3">
+                <div id="qiniu_tm_detailpanel">
+                    <div id="qiniu_tm_detailpanel_toolbox">
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-primary active">
+                                <input type="radio" name="options" autocomplete="off" checked> 标注
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" name="options" autocomplete="off"> 设Key
+                            </label>
+                            <label class="btn btn-primary">
+                                <input type="radio" name="options" autocomplete="off"> 设Value
+                            </label>
+                        </div>
+                    </div>
+                    <div id="qiniu_tm_detailpanel_content">
+                        <div id="qiniu_tm_contentfiller" class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-profile-tab"></div>
+                    </div>
+    
+                    <div id="qiniu_tm_detailpanel_btngroup">
+                        <button id="qiniu_tm_detailpanel_btngroup_cancel" type="button" class="btn btn-secondary btn-sm">返回</button>
+                        <button id="qiniu_tm_detailpanel_btngroup_submit" type="button" class="btn btn-primary btn-sm">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <p>@right reserved by Qiniu.com</p>
+    </footer>
+
+    <!-- <script src="./libs/js/jquery.min.js"></script> -->
+    <!-- <script src="./libs/js/bootstrap.min.js"></script> -->
+    <script src="./javascript/labeltool.js"></script>
+    <script src="./javascript/app.js" defer></script>
+</body>
+</html>

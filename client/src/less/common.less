@@ -1,0 +1,217 @@
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+html {
+	font-size: 14
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100vh;
+}
+
+header {
+	text-align: center;
+	height: 10vh;
+}
+
+section {
+	display: flex;
+	height: 85vh;
+
+	#pingan_tm_leftpanel {
+		width: 70%;
+		padding: 20px;
+		border: 1px solid black;
+		overflow: scroll;
+	
+		#pingan_tm_imgcontainer {
+			width: 100%;
+			border: 1px solid black;
+			position: relative;
+		}
+		
+		/* #pingan_tm_canvas {
+			width: 100%;
+		} */
+		
+		#pingan_tm_img {
+			width: 100%;
+			z-index: 1;
+		}
+		
+		#pingan_tm_imgmarker {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			left: 0;
+			top: 0;
+			z-index: 999;
+		}
+		
+		.pingan-tm-selecthover:hover {
+			animation: selectEffect 1s infinite;
+		}
+	}
+	
+	#pingan_tm_rightpanel {
+		border: 1px solid black;
+		width: 30%;
+		padding: 20px;
+
+		.pingan-tm-title {
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+
+		#pingan_tm_rightpanel_detaillist {
+			table {
+				border-collapse: collapse;
+				width: 100%;
+
+				td {
+					width: 50%;
+					padding: .5rem;
+					border: 1px solid grey;
+
+					&:first-child {
+						color: blue;
+					}
+
+					&:hover {
+						cursor: pointer;
+					}
+				}
+			}
+		}
+
+		#pingan_tm_rightpanel_editor {
+			display: none;
+		}
+
+		form.pingan-tm-form {
+			>label {
+				display: block;
+			}
+		}
+
+		label {
+			margin-bottom: .7rem;
+		}
+
+		input.pingan-tm-input, textarea, select {
+			// display: block;
+			width: 100%;
+			padding: .375rem .75rem;
+			font-size: 1rem;
+			line-height: 1.5;
+			color: #495057;
+			background-color: #fff;
+			background-clip: padding-box;
+			border: 1px solid #ced4da;
+			border-radius: .25rem;
+			transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+			margin-bottom: 1rem;
+		}
+
+		textarea {
+			resize: none;
+		}
+
+		select {
+			height: 2rem;
+		}
+
+		#pingan_tm_form_buttongroup {
+			margin-top: 1rem;
+			text-align: center;
+		}
+	}
+}
+
+footer {
+	text-align: center;
+	height: 5vh;
+}
+
+
+.pingan-tm-btn-radio-group {
+	text-align: center;
+	
+	label {
+		.pingan-btn;
+		padding: 0.2rem 0.75rem;
+		width: 5rem;
+		text-align: center;
+
+		input {
+			display: none;
+		}
+	}
+
+	label:first-child {
+		color: #fff;
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	label:last-child {
+		color: #fff;
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+}
+
+.pingan-btn {
+	display: inline-block;
+	font-weight: 400;
+	width: 5.5rem;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.pingan-btn.pingan-btn-select {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pingan-btn:hover {
+	cursor: pointer;
+}
+
+.pingan-btn-cancel {
+	color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.pingan-btn-submit {
+	color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+@keyframes selectEffect {
+	0%   {stroke-opacity: 1; fill-opacity: 0.2}
+	50%  {stroke-opacity: 0.5; fill-opacity: 0.1}
+	100%  {stroke-opacity: 1; fill-opacity: 0.2}
+}
