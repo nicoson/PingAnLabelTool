@@ -211,7 +211,7 @@ function setValueFun(e) {
 function loadPageServer () {
     fetch('/getlist').then(e => e.json()).then(function(data) {
         LIST = data;
-        let tmp = data.map(datum => {return `<li class="list-group-item js-qiniu-tm-listitem-choose" data-filename="${datum.fileName || ''}">
+        let tmp = data.map(datum => {return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum.fileName || ''}">
                                             ${datum.fileName}
                                             <button type="button" class="close" aria-label="Close">
                                                 <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum.fileName || ''}">&times;</span>
@@ -238,7 +238,7 @@ function loadPageServer () {
             }
         }));
 
-        document.querySelectorAll(".js-qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
+        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
             let fileName = e.target.dataset.filename;
             let ind = LIST.findIndex(e => e.fileName == fileName);
             if(ind > -1) {
@@ -247,12 +247,12 @@ function loadPageServer () {
                 isNew = false;
                 document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
                 document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-                labeltool.init('/file/imgs/' + fileName);
+                let promise = labeltool.init('/file/imgs/' + fileName);
 
                 document.querySelector("#qiniu_tm_listcontainer").hidden = true;
                 document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
 
-                setTimeout(function(){return labeltool.inputBBox(DATA)}, 500);
+                promise.then(e => labeltool.inputBBox(DATA));
             }
         }));
     });

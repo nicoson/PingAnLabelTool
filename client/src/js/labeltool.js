@@ -31,10 +31,13 @@ class labelTool {
     init(imgURL) {
         this.img = new Image();
         this.img.src = imgURL;
-        this.img.onload = function() {
-            this.stretchRate = this.img.width / this.imgContainer.offsetWidth;
-            console.log(this.stretchRate);
-        }.bind(this)
+        return new Promise((resolve, reject) => {
+            this.img.onload = function() {
+                this.stretchRate = this.img.width / this.imgContainer.offsetWidth;
+                console.log(this.stretchRate);
+                resolve();
+            }.bind(this)
+        })
     }
 
     startTrace() {

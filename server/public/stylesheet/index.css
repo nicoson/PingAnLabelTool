@@ -137,3 +137,19 @@ footer p {
 .qiniu-tm-hidden {
   display: none;
 }
+.qiniu-tm-listitem-choose:hover {
+  cursor: pointer;
+  outline: 2px solid #007bff7a;
+  z-index: 999;
+}
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  opacity: 1;
+}
+::-webkit-scrollbar-thumb {
+  background: #77777766;
+  border-radius: 5px;
+}

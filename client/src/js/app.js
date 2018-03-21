@@ -70,21 +70,34 @@ function refreshList (Container, data) {
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">名称</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-2 col-form-label">名称</label>
+                            <div class="col-sm-4">
                                 <input type="text" class="form-control js-qiniu-tm-focus" placeholder="standard name" data-item="standard_name" data-id="${datum.id || ''}" value="${datum.standard_name || ''}" ／>
                             </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">内容</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control js-qiniu-tm-focus" placeholder="content" data-item="content" data-id="${datum.id || ''}" value="${datum.content || ''}" ／>
+                            <label class="col-sm-2 col-form-label">类型</label>
+                            <div class="col-sm-4">
+                                <select class="custom-select js-qiniu-tm-focus"  data-id="${datum.id || ''}"  data-item="classtype" value="${datum.classtype || ''}">
+                                    <option value="key" selected>关键词</option>
+                                    <option value="title">主标题</option>
+                                    <option value="subtitle">副标题</option>
+                                    <option value="contenttype">内容类型</option>
+                                </select>    
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">权重</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-2 col-form-label">内容*</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-qiniu-tm-focus" placeholder="content" data-item="content" data-id="${datum.id || ''}" value="${datum.content || ''}" ／>
+                            </div>
+                            <label class="col-sm-2 col-form-label">权重</label>
+                            <div class="col-sm-4">
                                 <input type="number" class="form-control js-qiniu-tm-focus" name="quantity" min="1" max="5" data-item="weight" data-id="${datum.id || ''}" value="${datum.weight || 1}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">同义词</label>
+                            <div class="col-sm-10">
+                            <input type="text" class="form-control js-qiniu-tm-focus" placeholder="prob_names" data-item="prob_names" data-id="${datum.id || ''}" value="${datum.prob_names || ''}" ／>
                             </div>
                         </div>
                     </div>
@@ -211,7 +224,7 @@ function setValueFun(e) {
 function loadPageServer () {
     fetch('/getlist').then(e => e.json()).then(function(data) {
         LIST = data;
-        let tmp = data.map(datum => {return `<li class="list-group-item js-qiniu-tm-listitem-choose" data-filename="${datum.fileName || ''}">
+        let tmp = data.map(datum => {return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum.fileName || ''}">
                                             ${datum.fileName}
                                             <button type="button" class="close" aria-label="Close">
                                                 <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum.fileName || ''}">&times;</span>
@@ -238,7 +251,7 @@ function loadPageServer () {
             }
         }));
 
-        document.querySelectorAll(".js-qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
+        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
             let fileName = e.target.dataset.filename;
             let ind = LIST.findIndex(e => e.fileName == fileName);
             if(ind > -1) {
@@ -247,12 +260,12 @@ function loadPageServer () {
                 isNew = false;
                 document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
                 document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-                labeltool.init('/file/imgs/' + fileName);
+                let promise = labeltool.init('/file/imgs/' + fileName);
 
                 document.querySelector("#qiniu_tm_listcontainer").hidden = true;
                 document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
 
-                setTimeout(function(){return labeltool.inputBBox(DATA)}, 500);
+                promise.then(e => labeltool.inputBBox(DATA));
             }
         }));
     });
