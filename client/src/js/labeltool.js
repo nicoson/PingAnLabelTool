@@ -156,7 +156,7 @@ class labelTool {
 
     inputBBox(datalist) {
         this.datalist = datalist;
-        this.count = datalist.slice(-1)[0].id ? (datalist.slice(-1)[0].id + 1) : 0;
+        this.count = (datalist.slice(-1)[0].id != undefined) ? (datalist.slice(-1)[0].id + 1) : 0;
 
         this.datalist.forEach(function(datum) {
             let points =   `${datum.bbox[0][0]/this.stretchRate},${datum.bbox[0][1]/this.stretchRate} 

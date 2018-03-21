@@ -77,10 +77,10 @@ function refreshList (Container, data) {
                             <label class="col-sm-2 col-form-label">类型</label>
                             <div class="col-sm-4">
                                 <select class="custom-select js-qiniu-tm-focus"  data-id="${datum.id || ''}"  data-item="classtype" value="${datum.classtype || ''}">
-                                    <option value="key" selected>关键词</option>
-                                    <option value="title">主标题</option>
-                                    <option value="subtitle">副标题</option>
-                                    <option value="contenttype">内容类型</option>
+                                    <option value="key" ${datum.classtype == 'key' ? 'selected':''}>关键词</option>
+                                    <option value="title" ${datum.classtype == 'title' ? 'selected':''}>主标题</option>
+                                    <option value="subtitle" ${datum.classtype == 'subtitle' ? 'selected':''}>副标题</option>
+                                    <option value="contenttype" ${datum.classtype == 'contenttype' ? 'selected':''}>内容类型</option>
                                 </select>    
                             </div>
                         </div>
