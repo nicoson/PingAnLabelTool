@@ -18,13 +18,6 @@ router.get('/getlist', function(req, res, next) {
   res.send(file);
 });
 
-router.post('/getdetail', function(req, res, next) {
-  let fileName = fs.readdirSync('public/file/');
-  console.log(req.body.fileName);
-  let data = fs.readFileSync('public/file/' + fileName);
-  res.send(data);
-});
-
 router.post('/remove', function(req, res, next) {
   let labelFile = 'public/file/label.json';
   let odata = JSON.parse(fs.readFileSync(labelFile));
@@ -68,5 +61,48 @@ router.post('/submit', function(req, res, next) {
   res.send('success');
 });
 
+
+// =========================================
+// second set
+// =========================================
+router.get('/getfilelist', function(req, res, next) {
+  let file = fs.readdirSync('public/file/');
+  console.log(file);
+  res.send(file.filter(e => e.indexOf('.json')>-1));
+});
+
+router.post('/getdetail', function(req, res, next) {
+  let fileName = req.body.fileName;
+  console.log(fileName);
+  let data = fs.readFileSync('public/file/' + fileName + '.json');
+  res.send(data);
+});
+
+router.post('/submitseperate', function(req, res, next) {
+  console.log(req.body.fileName);
+  let imgFileName = req.body.fileName + '.png';
+  let labelFileDir = 'public/file/' + req.body.fileName + '.json';
+
+  console.log('img name: ',req.body.imgs);
+  if(req.body.imgs != '') {
+    console.log(req.body.imgs);
+    var dataBuffer = new Buffer(req.body.imgs, 'base64');
+    fs.writeFileSync("public/file/imgs/" + imgFileName, dataBuffer);
+  }
+
+  fs.writeFileSync(labelFileDir, JSON.stringify({
+    fileName: req.body.fileName,
+    data: req.body.data
+  }), 'utf8');
+  res.send('success');
+});
+
+router.post('/removeseperate', function(req, res, next) {
+  let labelFile = 'public/file/' + req.body.fileName + '.json';
+  let imgFileName = "public/file/imgs/" + req.body.fileName + '.png';
+  fs.unlinkSync(labelFile);
+  fs.unlinkSync(imgFileName);
+  res.send('done');
+});
 
 module.exports = router;

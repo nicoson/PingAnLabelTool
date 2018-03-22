@@ -129,29 +129,29 @@ function refreshList (Container, data) {
     }));
 }
 
-function loadTemplateLabels () {
-    fetch('/mockdata/data.json').then(e => e.json()).then(function(data) {
-        let tmplist = [];
-        data.key.forEach(e => tmplist.push({
-            position: e.coord,
-            standard_name: e.standard_name,
-            weight: e.weight,
-            isKey: true,
-            isTitle: e.isTitle
-        }));
+// function loadTemplateLabels () {
+//     fetch('/mockdata/data.json').then(e => e.json()).then(function(data) {
+//         let tmplist = [];
+//         data.key.forEach(e => tmplist.push({
+//             position: e.coord,
+//             standard_name: e.standard_name,
+//             weight: e.weight,
+//             isKey: true,
+//             isTitle: e.isTitle
+//         }));
         
-        data.value.forEach(e => tmplist.push({
-            bbox: e.bbox,
-            standard_name: e.standard_name,
-            weight: e.weight,
-            isKey: false,
-            isTitle: e.isTitle
-        }));
+//         data.value.forEach(e => tmplist.push({
+//             bbox: e.bbox,
+//             standard_name: e.standard_name,
+//             weight: e.weight,
+//             isKey: false,
+//             isTitle: e.isTitle
+//         }));
         
-        DATA = new NiuArray();
-        DATA.push(tmplist);
-    });
-}
+//         DATA = new NiuArray();
+//         DATA.push(tmplist);
+//     });
+// }
 
 //  binding box status
 document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[0].addEventListener("click", function(e) {
@@ -222,12 +222,12 @@ function setValueFun(e) {
 // }
 
 function loadPageServer () {
-    fetch('/getlist').then(e => e.json()).then(function(data) {
+    fetch('/getfilelist').then(e => e.json()).then(function(data) {
         LIST = data;
-        let tmp = data.map(datum => {return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum.fileName || ''}">
-                                            ${datum.fileName}
+        let tmp = data.map(datum => {datum = datum.replace('.json', ''); return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
+                                            ${datum}
                                             <button type="button" class="close" aria-label="Close">
-                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum.fileName || ''}">&times;</span>
+                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
                                             </button>
                                         </li>`});
         document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
@@ -245,28 +245,50 @@ function loadPageServer () {
                     body: JSON.stringify({'fileName': e.target.dataset.filename})
                 }
     
-                fetch('/remove', postBody).then(function (response) {
+                fetch('/removeseperate', postBody).then(function (response) {
                     console.log('response: ', response);
+                    location.reload();
                 });
             }
         }));
 
         document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
             let fileName = e.target.dataset.filename;
-            let ind = LIST.findIndex(e => e.fileName == fileName);
-            if(ind > -1) {
-                LIST[ind].data.forEach(e => DATA.push(e));
+            let postBody = {
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify({'fileName': fileName})
+            }
 
+            fetch('getdetail', postBody).then(e => e.json()).then(e => {
+                e.data.forEach(e => DATA.push(e));
                 isNew = false;
-                document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
-                document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-                let promise = labeltool.init('/file/imgs/' + fileName);
+                document.querySelector('#qiniu_tm_templatename').value = fileName;
+                let imgURL = '/file/imgs/' + fileName + '.png';
+                document.querySelector('#qiniu_tm_img').src = imgURL;
+                let promise = labeltool.init(imgURL);
 
                 document.querySelector("#qiniu_tm_listcontainer").hidden = true;
                 document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
 
                 promise.then(e => labeltool.inputBBox(DATA));
-            }
+            });
+            // let ind = LIST.findIndex(e => e.fileName == fileName);
+            // if(ind > -1) {
+            //     LIST[ind].data.forEach(e => DATA.push(e));
+
+            //     isNew = false;
+            //     document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
+            //     document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
+            //     let promise = labeltool.init('/file/imgs/' + fileName);
+
+            //     document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+            //     document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+
+            //     promise.then(e => labeltool.inputBBox(DATA));
+            // }
         }));
     });
 }
@@ -329,7 +351,7 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
                 body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': imgData})
             }
     
-            fetch('/submit', postBody).then(function (response) {
+            fetch('/submitseperate', postBody).then(function (response) {
                 console.log('response: ', response);
             });
         }
@@ -342,7 +364,7 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
             body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': ''})
         }
 
-        fetch('/submit', postBody).then(function (response) {
+        fetch('/submitseperate', postBody).then(function (response) {
             console.log('response: ', response);
         });
     }
