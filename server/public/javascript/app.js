@@ -100,41 +100,15 @@ function refreshList (Container, data) {
     data.forEach(function(datum){
         tmp +=  `<div class="card bg-light ${datum.isKey ? 'text-primary border-primary' : 'text-success border-success'} mb-3">
                     <div class="card-header">
-                        ${(datum.isKey ? 'Key: ' : 'Value: ') + datum.id}
                         <button type="button" class="close" aria-label="Close">
                             <span aria-hidden="true" class="js-qiniu-tm-tab-remove" data-id="${datum.id || ''}">&times;</span>
                         </button>
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">名称</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control js-qiniu-tm-focus" placeholder="standard name" data-item="standard_name" data-id="${datum.id || ''}" value="${datum.standard_name || ''}" ／>
-                            </div>
-                            <label class="col-sm-2 col-form-label">类型</label>
-                            <div class="col-sm-4">
-                                <select class="custom-select js-qiniu-tm-focus"  data-id="${datum.id || ''}"  data-item="classtype" value="${datum.classtype || ''}">
-                                    <option value="key" ${datum.classtype == 'key' ? 'selected':''}>关键词</option>
-                                    <option value="title" ${datum.classtype == 'title' ? 'selected':''}>主标题</option>
-                                    <option value="subtitle" ${datum.classtype == 'subtitle' ? 'selected':''}>副标题</option>
-                                    <option value="contenttype" ${datum.classtype == 'contenttype' ? 'selected':''}>内容类型</option>
-                                </select>    
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">内容*</label>
-                            <div class="col-sm-4">
+                            <label class="col-sm-3 col-form-label">内容*</label>
+                            <div class="col-sm-9">
                                 <input type="text" class="form-control js-qiniu-tm-focus" placeholder="content" data-item="content" data-id="${datum.id || ''}" value="${datum.content || ''}" ／>
-                            </div>
-                            <label class="col-sm-2 col-form-label">权重</label>
-                            <div class="col-sm-4">
-                                <input type="number" class="form-control js-qiniu-tm-focus" name="quantity" min="1" max="5" data-item="weight" data-id="${datum.id || ''}" value="${datum.weight || 1}" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">同义词</label>
-                            <div class="col-sm-10">
-                            <input type="text" class="form-control js-qiniu-tm-focus" placeholder="prob_names" data-item="prob_names" data-id="${datum.id || ''}" value="${datum.prob_names || ''}" ／>
                             </div>
                         </div>
                     </div>
@@ -190,12 +164,14 @@ function setValueFun(e) {
 }
 
 document.querySelector('#qiniu_tm_imgnav_previous').addEventListener('click', function(e) {
+    saveResult();
     CURRENT = (CURRENT <= 0) ? 0 : (CURRENT - 1);
     console.log(CURRENT);
     loadImgPage()
 });
 
 document.querySelector('#qiniu_tm_imgnav_next').addEventListener('click', function(e) {
+    saveResult();
     CURRENT = (CURRENT >= (LIST.length-1)) ? CURRENT : (CURRENT + 1);
     console.log(CURRENT);
     loadImgPage()
@@ -206,6 +182,10 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').addEventListener
 });
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener('click', function(e) {
+    saveResult();
+});
+
+function saveResult() {
     if(LIST == null) return;
 
     LIST[CURRENT].data = DATA;
@@ -220,4 +200,4 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
     fetch('/submit', postBody).then(function (response) {
         console.log('response: ', response);
     });
-});
+}

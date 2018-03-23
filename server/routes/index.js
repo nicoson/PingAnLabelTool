@@ -18,24 +18,24 @@ router.get('/getlist', function(req, res, next) {
   res.send(file);
 });
 
-router.post('/remove', function(req, res, next) {
-  let labelFile = 'public/file/label.json';
-  let odata = JSON.parse(fs.readFileSync(labelFile));
-  console.log(odata);
-  let ind = odata.findIndex(e => e.fileName == req.body.fileName);
-  console.log(ind);
-  if(ind > -1) {
-    odata.splice(ind, 1);
-    console.log(odata);
-    fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
-    console.log('odata');
-    let fn = "public/file/imgs/" + req.body.fileName;
-    fs.unlink("public/file/imgs/" + req.body.fileName);
+// router.post('/remove', function(req, res, next) {
+//   let labelFile = 'public/file/label.json';
+//   let odata = JSON.parse(fs.readFileSync(labelFile));
+//   console.log(odata);
+//   let ind = odata.findIndex(e => e.fileName == req.body.fileName);
+//   console.log(ind);
+//   if(ind > -1) {
+//     odata.splice(ind, 1);
+//     console.log(odata);
+//     fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
+//     console.log('odata');
+//     let fn = "public/file/imgs/" + req.body.fileName;
+//     fs.unlink("public/file/imgs/" + req.body.fileName);
 
-    console.log('bb');
-  }
-  res.send('success');
-});
+//     console.log('bb');
+//   }
+//   res.send('success');
+// });
 
 router.post('/submit', function(req, res, next) {
   console.log(req.body.data);
@@ -53,7 +53,7 @@ router.post('/submit', function(req, res, next) {
 router.get('/getfilelist', function(req, res, next) {
   let file = fs.readdirSync('public/file/');
   console.log(file);
-  res.send(file);
+  res.send(file.filter(e => e != '.DS_Store'));
 });
 
 router.post('/getImgList', function(req, res, next) {
@@ -90,31 +90,31 @@ router.post('/getImgList', function(req, res, next) {
   res.send(result);
 });
 
-router.post('/submitseperate', function(req, res, next) {
-  console.log(req.body.fileName);
-  let imgFileName = req.body.fileName + '.png';
-  let labelFileDir = 'public/file/' + req.body.fileName + '.json';
+// router.post('/submitseperate', function(req, res, next) {
+//   console.log(req.body.fileName);
+//   let imgFileName = req.body.fileName + '.png';
+//   let labelFileDir = 'public/file/' + req.body.fileName + '.json';
 
-  console.log('img name: ',req.body.imgs);
-  if(req.body.imgs != '') {
-    console.log(req.body.imgs);
-    var dataBuffer = new Buffer(req.body.imgs, 'base64');
-    fs.writeFileSync("public/file/imgs/" + imgFileName, dataBuffer);
-  }
+//   console.log('img name: ',req.body.imgs);
+//   if(req.body.imgs != '') {
+//     console.log(req.body.imgs);
+//     var dataBuffer = new Buffer(req.body.imgs, 'base64');
+//     fs.writeFileSync("public/file/imgs/" + imgFileName, dataBuffer);
+//   }
 
-  fs.writeFileSync(labelFileDir, JSON.stringify({
-    fileName: req.body.fileName,
-    data: req.body.data
-  }), 'utf8');
-  res.send('success');
-});
+//   fs.writeFileSync(labelFileDir, JSON.stringify({
+//     fileName: req.body.fileName,
+//     data: req.body.data
+//   }), 'utf8');
+//   res.send('success');
+// });
 
-router.post('/removeseperate', function(req, res, next) {
-  let labelFile = 'public/file/' + req.body.fileName + '.json';
-  let imgFileName = "public/file/imgs/" + req.body.fileName + '.png';
-  fs.unlinkSync(labelFile);
-  fs.unlinkSync(imgFileName);
-  res.send('done');
-});
+// router.post('/removeseperate', function(req, res, next) {
+//   let labelFile = 'public/file/' + req.body.fileName + '.json';
+//   let imgFileName = "public/file/imgs/" + req.body.fileName + '.png';
+//   fs.unlinkSync(labelFile);
+//   fs.unlinkSync(imgFileName);
+//   res.send('done');
+// });
 
 module.exports = router;
