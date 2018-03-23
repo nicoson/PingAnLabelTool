@@ -1,22 +1,15 @@
 class NiuArray extends Array {
     constructor(...args) {
-        // 调用父类Array的constructor()
         super(...args);
         this.Container = document.querySelector("#qiniu_tm_contentfiller");
+        // this.Container.innerHTML = "";
     }
-    // addContainer (Container) {
-    //     this.Container = Container;
-    // }
     push (...args) {
-        // console.log('trigger push listener');
-        // 调用父类原型push方法
         super.push(...args)
         refreshList(this.Container, DATA);
         return this
     }
     splice (...args) {
-        // console.log('trigger splice listener');
-        // 调用父类原型push方法
         super.splice(...args)
         refreshList(this.Container, DATA);
         return this
@@ -24,37 +17,81 @@ class NiuArray extends Array {
 }
 
 let labeltool = null;
-// let FILENAME = null;
 let DATA = new NiuArray();  //  2-way binding page data
 let LIST = null;
+let CURRENT = 0;
+let currentFolder = null;
 let isNew = true;
-// DATA.addContainer(document.querySelector("#qiniu_tm_contentfiller"));
 
 window.onload = function() {
     let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
     let imgContainer = document.querySelector('#qiniu_tm_img');
     labeltool = new labelTool(svgContainer, imgContainer, DATA);
 
-    //  load list on the server
-    // loadPagelocal();
     loadPageServer();
 
     // binding change event for image container
     document.querySelector("#qiniu_tm_imgcontainer").hidden = true;
-    document.querySelector('#qiniu_tm_imgselector').addEventListener('change', function(e) {
-        let imgData = window.URL.createObjectURL(e.target.files[0]);
-        document.querySelector('#qiniu_tm_img').src = imgData;
-        labeltool.init(imgData);
+}
 
-        document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-        document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+function loadPageServer () {
+    fetch('/getfilelist').then(e => e.json()).then(function(data) {
+        let tmp = data.map(datum => {
+            datum = datum.replace('.json', '');
+            return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
+                        ${datum}
+                    </li>`
+        });
+        document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
 
-        // let FILENAME = document.querySelector("#qiniu_tm_templatename").value;
-        // let ind = odata.findIndex(e => e.fileName == FILENAME);
-        // if(ind > -1) {
-        //     odata[ind].data.forEach(e => DATA.push(e));
-        //     setTimeout(function(){return labeltool.inputBBox(DATA)}, 1000);
-        // }
+        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
+            let fileName = e.target.dataset.filename;
+            let postBody = {
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify({'dirname': fileName})
+            }
+            currentFolder = fileName;
+
+            fetch('getImgList', postBody).then(e => e.json()).then(imgList => {
+                LIST = imgList;
+                CURRENT = 0;
+
+                loadImgPage();
+            });
+        }));
+    });
+}
+
+function loadImgPage() {
+    DATA = new  NiuArray();
+    let containerBody = document.querySelector('#qiniu_tm_imgcontainer_body');
+    let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+    let imgContainer = document.querySelector('#qiniu_tm_img');
+    containerBody.removeChild(svgContainer);
+    svgContainer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgContainer.setAttribute('id', 'qiniu_tm_imgmarker');
+    containerBody.appendChild(svgContainer);
+
+    labeltool = new labelTool(svgContainer, imgContainer, DATA);
+
+    document.querySelector("#qiniu_tm_contentfiller").innerHTML = "";
+    let datum = LIST[CURRENT]
+    datum.data.forEach(e => DATA.push(e));
+    let imgURL = datum.url;
+    document.querySelector('#qiniu_tm_img').src = imgURL;
+    let promise = labeltool.init(imgURL);
+
+    document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+    document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+
+    promise.then(e => {
+        let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+        let imgContainer = document.querySelector('#qiniu_tm_img');
+        svgContainer.style.height = imgContainer.clientHeight;
+        labeltool.inputBBox(DATA);
     });
 }
 
@@ -129,47 +166,6 @@ function refreshList (Container, data) {
     }));
 }
 
-// function loadTemplateLabels () {
-//     fetch('/mockdata/data.json').then(e => e.json()).then(function(data) {
-//         let tmplist = [];
-//         data.key.forEach(e => tmplist.push({
-//             position: e.coord,
-//             standard_name: e.standard_name,
-//             weight: e.weight,
-//             isKey: true,
-//             isTitle: e.isTitle
-//         }));
-        
-//         data.value.forEach(e => tmplist.push({
-//             bbox: e.bbox,
-//             standard_name: e.standard_name,
-//             weight: e.weight,
-//             isKey: false,
-//             isTitle: e.isTitle
-//         }));
-        
-//         DATA = new NiuArray();
-//         DATA.push(tmplist);
-//     });
-// }
-
-//  binding box status
-document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[0].addEventListener("click", function(e) {
-    document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setKeyFun));
-    document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setValueFun));
-});
-
-//  binding key status
-document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[1].addEventListener("click", function(e) {
-    document.querySelectorAll('polygon').forEach(e => e.addEventListener('click', setKeyFun));
-    document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setValueFun));
-});
-
-//  binding value status
-document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[2].addEventListener("click", function(e) {
-    document.querySelectorAll('polygon').forEach(e => e.addEventListener('click', setValueFun));
-    document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setKeyFun));
-});
 
 function setKeyFun(e) {
     e.stopPropagation();
@@ -193,194 +189,35 @@ function setValueFun(e) {
     refreshList(document.querySelector("#qiniu_tm_contentfiller"), DATA);
 }
 
+document.querySelector('#qiniu_tm_imgnav_previous').addEventListener('click', function(e) {
+    CURRENT = (CURRENT <= 0) ? 0 : (CURRENT - 1);
+    console.log(CURRENT);
+    loadImgPage()
+});
 
-// function loadPagelocal () {
-//     let data = localStorage.data ? JSON.parse(localStorage.data) : [];
-//     if(data.length != 0) {
-//         let tmp = data.reverse().map(datum => {return `<li class="list-group-item">
-//                                             ${datum.fileName}
-//                                             <button type="button" class="close" aria-label="Close">
-//                                                 <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum.fileName || ''}">&times;</span>
-//                                             </button>
-//                                         </li>`});
-//         document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
-//     }
-    
-
-//     let cateSelector = localStorage.cate ? localStorage.cate : null;
-//     if(cateSelector != null) {
-//         document.querySelector('#qiniu_tm_cateselector').value = cateSelector;
-//     }
-
-//     document.querySelectorAll(".js-qiniu-tm-listitem-remove").forEach(ele => ele.addEventListener("click", function(e) {
-//         let odata = localStorage.data ? JSON.parse(localStorage.data) : [];
-//         let ind = odata.findIndex(t => t.fileName == e.target.dataset.filename);
-//         odata.splice(ind, 1);
-//         localStorage.data = JSON.stringify(odata);
-//         location.reload();
-//     }));
-// }
-
-function loadPageServer () {
-    fetch('/getfilelist').then(e => e.json()).then(function(data) {
-        LIST = data;
-        let tmp = data.map(datum => {datum = datum.replace('.json', ''); return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
-                                            ${datum}
-                                            <button type="button" class="close" aria-label="Close">
-                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
-                                            </button>
-                                        </li>`});
-        document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
-
-        document.querySelectorAll(".js-qiniu-tm-listitem-remove").forEach(ele => ele.addEventListener("click", function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            let conf = confirm("您确定要删除这个模版吗？");
-            if(conf == true) {
-                let postBody = {
-                    headers: { 
-                        "Content-Type": "application/json"
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({'fileName': e.target.dataset.filename})
-                }
-    
-                fetch('/removeseperate', postBody).then(function (response) {
-                    console.log('response: ', response);
-                    location.reload();
-                });
-            }
-        }));
-
-        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
-            let fileName = e.target.dataset.filename;
-            let postBody = {
-                headers: { 
-                    "Content-Type": "application/json"
-                },
-                method: 'POST',
-                body: JSON.stringify({'fileName': fileName})
-            }
-
-            fetch('getdetail', postBody).then(e => e.json()).then(e => {
-                e.data.forEach(e => DATA.push(e));
-                isNew = false;
-                document.querySelector('#qiniu_tm_templatename').value = fileName;
-                let imgURL = '/file/imgs/' + fileName + '.png';
-                document.querySelector('#qiniu_tm_img').src = imgURL;
-                let promise = labeltool.init(imgURL);
-
-                document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-                document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-                promise.then(e => labeltool.inputBBox(DATA));
-            });
-            // let ind = LIST.findIndex(e => e.fileName == fileName);
-            // if(ind > -1) {
-            //     LIST[ind].data.forEach(e => DATA.push(e));
-
-            //     isNew = false;
-            //     document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
-            //     document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-            //     let promise = labeltool.init('/file/imgs/' + fileName);
-
-            //     document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-            //     document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-            //     promise.then(e => labeltool.inputBBox(DATA));
-            // }
-        }));
-    });
-}
-
-// document.querySelector('#qiniu_tm_listcontainer_upload').addEventListener('click', function(e) {
-//     if(localStorage.data == undefined || localStorage.data.length == 0) return;
-//     let postBody = {
-//         headers: { 
-//             "Content-Type": "application/json"
-//         },
-//         method: 'POST',
-//         body: localStorage.data
-//     }
-
-//     fetch('/submit', postBody).then(function(response) {
-//         console.log(response.ok);
-//         if(response.ok) {
-//             let cls = document.querySelector('#qiniu_tm_success_alert').getAttribute('class').replace('qiniu-tm-hidden', '');
-//             document.querySelector('#qiniu_tm_success_alert').setAttribute('class', cls);
-//             setTimeout(function() {
-//                 let cls = document.querySelector('#qiniu_tm_success_alert').getAttribute('class') + 'qiniu-tm-hidden';
-//                 document.querySelector('#qiniu_tm_success_alert').setAttribute('class', cls);
-//             }, 1000);
-//             console.log('update success!');
-//         } else {
-//             let cls = document.querySelector('#qiniu_tm_fail_alert').getAttribute('class').replace('qiniu-tm-hidden', '');
-//             document.querySelector('#qiniu_tm_fail_alert').setAttribute('class', cls);
-//             setTimeout(function() {
-//                 let cls = document.querySelector('#qiniu_tm_fail_alert').getAttribute('class') + 'qiniu-tm-hidden';
-//                 document.querySelector('#qiniu_tm_fail_alert').setAttribute('class', cls);
-//             }, 1000);
-//             console.log('update failed!');
-//         }
-        
-//     }).catch(function(e) {
-//         console.log(e);
-//     });
-// });
+document.querySelector('#qiniu_tm_imgnav_next').addEventListener('click', function(e) {
+    CURRENT = (CURRENT >= (LIST.length-1)) ? CURRENT : (CURRENT + 1);
+    console.log(CURRENT);
+    loadImgPage()
+});
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').addEventListener('click', function(e) {
     location.reload();
 });
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener('click', function(e) {
-    let fileName = document.querySelector('#qiniu_tm_templatename').value;
-    if(fileName.length == 0 && isNew) return;
+    if(LIST == null) return;
 
-    if(isNew) {
-        let imgURL = window.URL.createObjectURL(document.querySelector('#qiniu_tm_imgselector').files[0]);
-        let img = new Image();
-        img.src = imgURL;
-        img.onload = function() {
-            let imgData = getBase64Image(img);
-            // console.log(data);
-            let postBody = {
-                headers: { 
-                    "Content-Type": "application/json"
-                },
-                method: 'POST',
-                body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': imgData})
-            }
-    
-            fetch('/submitseperate', postBody).then(function (response) {
-                console.log('response: ', response);
-            });
-        }
-    } else {
-        let postBody = {
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            method: 'POST',
-            body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': ''})
-        }
-
-        fetch('/submitseperate', postBody).then(function (response) {
-            console.log('response: ', response);
-        });
+    LIST[CURRENT].data = DATA;
+    let postBody = {
+        headers: { 
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify({data: LIST, folder: currentFolder})
     }
-    
+
+    fetch('/submit', postBody).then(function (response) {
+        console.log('response: ', response);
+    });
 });
-
-function getBase64Image(img) {
-    var canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-
-    var dataURL = canvas.toDataURL("image/png");
-    // return dataURL
-
-    return dataURL.replace("data:image/png;base64,", "");
-}

@@ -38,26 +38,11 @@ router.post('/remove', function(req, res, next) {
 });
 
 router.post('/submit', function(req, res, next) {
-  console.log(req.body.fileName);
-  let fileName = req.body.fileName + '.png';
-  let labelFile = 'public/file/label.json';
+  console.log(req.body.data);
+  console.log(req.body.folder);
+  let filedir = "public/file/" + req.body.folder + '/label.json';
 
-  let odata = JSON.parse(fs.readFileSync(labelFile));
-  let ind = odata.findIndex(e => e.fileName == fileName);
-  if(ind > -1) {
-    odata[ind].data = req.body.data;
-  } else {
-    odata.push({
-      fileName: fileName,
-      data: req.body.data
-    });
-    
-    var dataBuffer = new Buffer(req.body.imgs, 'base64');
-    fs.writeFileSync("public/file/imgs/" + fileName, dataBuffer);
-    res.send("保存成功！");
-  }
-
-  fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
+  fs.writeFileSync(filedir, JSON.stringify(req.body.data), 'utf8');
   res.send('success');
 });
 
@@ -68,14 +53,41 @@ router.post('/submit', function(req, res, next) {
 router.get('/getfilelist', function(req, res, next) {
   let file = fs.readdirSync('public/file/');
   console.log(file);
-  res.send(file.filter(e => e.indexOf('.json')>-1));
+  res.send(file);
 });
 
-router.post('/getdetail', function(req, res, next) {
-  let fileName = req.body.fileName;
-  console.log(fileName);
-  let data = fs.readFileSync('public/file/' + fileName + '.json');
-  res.send(data);
+router.post('/getImgList', function(req, res, next) {
+  let filedir = 'public/file/' + req.body.dirname + '/label.json';
+  console.log(filedir);
+  let data = [];
+  if(fs.existsSync(filedir)) {
+    console.log('... ... reading label.json');
+    data = JSON.parse(fs.readFileSync(filedir, 'utf8'));
+    console.log(data);
+  }
+
+  let imgList = fs.readdirSync('public/file/' + req.body.dirname);
+  imgList = imgList.filter(e => e != 'label.json' && e != '.DS_Store');
+  console.log(imgList);
+
+  let result = imgList.map(e => {
+    let ind = data.findIndex(datum => datum.url == ('/file/' + req.body.dirname + '/' + e));
+    console.log(ind, ('/file/' + req.body.dirname + '/' + e));
+    if(ind > -1) {
+      return {
+        url: '/file/' + req.body.dirname + '/' + e,
+        data: data[ind].data
+      }
+    } else {
+      return {
+        url: '/file/' + req.body.dirname + '/' + e,
+        data: []
+      }
+    }
+  })
+  console.log(result);
+  
+  res.send(result);
 });
 
 router.post('/submitseperate', function(req, res, next) {

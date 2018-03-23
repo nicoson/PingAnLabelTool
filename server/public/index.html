@@ -16,35 +16,25 @@
         Upload Failed!
     </div>
     <header>
-        <p>平安票据模版定制系统 V1.0.0</p>
+        <p>七牛票据模版定制系统 V1.0.0</p>
     </header>
     <section class="container-fluid">
         <div class="row">
             <div id='qiniu_tm_leftpanel' class="col-8">
                 <div id="qiniu_tm_listcontainer">
-                    <p>新建样本票据：</p>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="qiniu_tm_templatename">票据模版名称</label>
-                        </div>
-                        <input id="qiniu_tm_templatename" type="text" class="form-control" />
-                    </div>
-                    <div class="input-group mb-3">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" id='qiniu_tm_imgselector' ／>
-                            <label class="custom-file-label" for="qiniu_tm_imgselector">选择票据样张</label>
-                        </div>
-                    </div>
-                    <br />
                     <p>
-                        当前已标注的票据:
+                        样本文件夹:
                     </p>
                     <div id="qiniu_tm_listcontainer_list" class="list-group">
                         <ul class="list-group"></ul>
                     </div>
                 </div>
                 <div id='qiniu_tm_imgcontainer'>
-                    <div>
+                    <div id="qiniu_tm_imgnav">
+                        <button id="qiniu_tm_imgnav_previous"><span aria-hidden="true">&laquo;</span></button>
+                        <button id="qiniu_tm_imgnav_next"><span aria-hidden="true">&raquo;</span></button>
+                    </div>
+                    <div id='qiniu_tm_imgcontainer_body'>
                         <!-- <canvas id='qiniu_tm_canvas'></canvas> -->
                         <img id='qiniu_tm_img' src='' alt=''>
                         <svg id='qiniu_tm_imgmarker' xmlns='http://www.w3.org/2000/svg' version='1.1'></svg>
@@ -54,19 +44,6 @@
         
             <div id='qiniu_tm_rightpanel' class="col-4">
                 <div id="qiniu_tm_detailpanel">
-                    <div id="qiniu_tm_detailpanel_toolbox">
-                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                            <label class="btn btn-primary active">
-                                <input type="radio" name="options" autocomplete="off" checked> 标注
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" name="options" autocomplete="off"> 设Key
-                            </label>
-                            <label class="btn btn-primary">
-                                <input type="radio" name="options" autocomplete="off"> 设Value
-                            </label>
-                        </div>
-                    </div>
                     <div id="qiniu_tm_detailpanel_content">
                         <div id="qiniu_tm_contentfiller" class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-profile-tab"></div>
                     </div>
@@ -83,8 +60,6 @@
         <p>@right reserved by Qiniu.com</p>
     </footer>
 
-    <!-- <script src="./libs/js/jquery.min.js"></script> -->
-    <!-- <script src="./libs/js/bootstrap.min.js"></script> -->
     <script src="./javascript/labeltool.js"></script>
     <script src="./javascript/app.js" defer></script>
 </body>
