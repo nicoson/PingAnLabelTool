@@ -85,7 +85,6 @@ router.post('/submitseperate', function(req, res, next) {
 
   console.log('img name: ',req.body.imgs);
   if(req.body.imgs != '') {
-    console.log(req.body.imgs);
     var dataBuffer = new Buffer(req.body.imgs, 'base64');
     fs.writeFileSync("public/file/imgs/" + imgFileName, dataBuffer);
   }
