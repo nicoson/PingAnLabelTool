@@ -84,8 +84,6 @@
                         </div>
                     </form>
 
-
-
                     <br />
                     <h5>
                         训练数据集:
@@ -95,6 +93,7 @@
                     </div>
                 </div>
                 <div id='qiniu_tm_imgcontainer'>
+                    <p><b>当前分类：</b><span id="qiniu_tm_imgcontainer_title_classname">biubiu</span> &nbsp; &nbsp; &nbsp; &nbsp;<b>模版文件：</b><span id="qiniu_tm_imgcontainer_title_filename">xxx</span></p>
                     <div>
                         <!-- <canvas id='qiniu_tm_canvas'></canvas> -->
                         <img id='qiniu_tm_img' src='' alt=''>
@@ -108,13 +107,13 @@
                     <div id="qiniu_tm_detailpanel_toolbox">
                         <div class="btn-group btn-group-toggle" data-toggle="buttons">
                             <label class="btn btn-primary active">
-                                <input type="radio" name="options" autocomplete="off" checked> 标注
+                                <input type="radio" name="options" autocomplete="off" checked disabled /> 标注
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="options" autocomplete="off"> 设Key
+                                <input type="radio" name="options" autocomplete="off" disabled /> 设Key
                             </label>
                             <label class="btn btn-primary">
-                                <input type="radio" name="options" autocomplete="off"> 设Value
+                                <input type="radio" name="options" autocomplete="off" disabled /> 设Value
                             </label>
                         </div>
                     </div>
@@ -123,8 +122,8 @@
                     </div>
     
                     <div id="qiniu_tm_detailpanel_btngroup">
-                        <button id="qiniu_tm_detailpanel_btngroup_cancel" type="button" class="btn btn-secondary btn-sm">返回</button>
-                        <button id="qiniu_tm_detailpanel_btngroup_submit" type="button" class="btn btn-primary btn-sm">保存</button>
+                        <button id="qiniu_tm_detailpanel_btngroup_cancel" type="button" class="btn btn-secondary btn-sm" disabled>返回</button>
+                        <button id="qiniu_tm_detailpanel_btngroup_submit" type="button" class="btn btn-primary btn-sm" disabled>保存</button>
                     </div>
                 </div>
             </div>

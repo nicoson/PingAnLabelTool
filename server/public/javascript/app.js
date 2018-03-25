@@ -1,22 +1,16 @@
 class NiuArray extends Array {
     constructor(...args) {
-        // 调用父类Array的constructor()
         super(...args);
         this.Container = document.querySelector("#qiniu_tm_contentfiller");
     }
-    // addContainer (Container) {
-    //     this.Container = Container;
-    // }
     push (...args) {
         // console.log('trigger push listener');
-        // 调用父类原型push方法
         super.push(...args)
         refreshList(this.Container, DATA);
         return this
     }
     splice (...args) {
         // console.log('trigger splice listener');
-        // 调用父类原型push方法
         super.splice(...args)
         refreshList(this.Container, DATA);
         return this
@@ -25,20 +19,14 @@ class NiuArray extends Array {
 
 let labeltool = null;
 // let FILENAME = null;
-let DATA = new NiuArray();  //  2-way binding page data
+let DATA = null;    //new NiuArray();  //  2-way binding page data
 let LIST = null;
 let isNew = true;
 // DATA.addContainer(document.querySelector("#qiniu_tm_contentfiller"));
 
 window.onload = function() {
-    let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
-    let imgContainer = document.querySelector('#qiniu_tm_img');
-    labeltool = new labelTool(svgContainer, imgContainer, DATA);
-
-    //  load list on the server
-    // loadPagelocal();
-    // loadPageServer();
-    loadClassList();
+    reloadLabelTool();  //  re-initiate label tool
+    refreshSelector();  //  refresh the select list
 
     // binding change event for image container
     document.querySelector("#qiniu_tm_imgcontainer").hidden = true;
@@ -56,18 +44,16 @@ window.onload = function() {
     
             document.querySelector('#qiniu_tm_uploadimg_label').textContent = namelist.join('; ');
         }
-        
-
-        // document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-        // document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-        // let FILENAME = document.querySelector("#qiniu_tm_templatename").value;
-        // let ind = odata.findIndex(e => e.fileName == FILENAME);
-        // if(ind > -1) {
-        //     odata[ind].data.forEach(e => DATA.push(e));
-        //     setTimeout(function(){return labeltool.inputBBox(DATA)}, 1000);
-        // }
     });
+}
+
+function reloadLabelTool() {
+    if(labeltool) labeltool.destory();
+    document.querySelector("#qiniu_tm_contentfiller").innerHTML = '';
+    DATA = new NiuArray();  //  2-way binding page data
+    let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+    let imgContainer = document.querySelector('#qiniu_tm_img');
+    labeltool = new labelTool(svgContainer, imgContainer, DATA);
 }
 
 function refreshList (Container, data) {
@@ -141,30 +127,6 @@ function refreshList (Container, data) {
     }));
 }
 
-// function loadTemplateLabels () {
-//     fetch('/mockdata/data.json').then(e => e.json()).then(function(data) {
-//         let tmplist = [];
-//         data.key.forEach(e => tmplist.push({
-//             position: e.coord,
-//             standard_name: e.standard_name,
-//             weight: e.weight,
-//             isKey: true,
-//             isTitle: e.isTitle
-//         }));
-        
-//         data.value.forEach(e => tmplist.push({
-//             bbox: e.bbox,
-//             standard_name: e.standard_name,
-//             weight: e.weight,
-//             isKey: false,
-//             isTitle: e.isTitle
-//         }));
-        
-//         DATA = new NiuArray();
-//         DATA.push(tmplist);
-//     });
-// }
-
 //  binding box status
 document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[0].addEventListener("click", function(e) {
     document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setKeyFun));
@@ -204,23 +166,29 @@ document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('clic
 });
 
 document.querySelector('#qiniu_tm_chooseclass').addEventListener("change", function(e) {
+    refreshImgList();
+});
+
+function refreshImgList() {
     let postBody = {
         headers: { 
             "Content-Type": "application/json"
         },
         method: 'POST',
-        body: JSON.stringify({'fileName': e.target.value})
+        body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
     }
 
     fetch('getImglist', postBody).then(e => e.json()).then(data => {
         let tmp = "";
-        if(data.length) {
-            tmp = data.map(datum => {datum = datum.replace('.json', ''); return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
-                                            ${datum}
-                                            <button type="button" class="close" aria-label="Close">
-                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
-                                            </button>
-                                        </li>`});
+        if(data.imgList.length) {
+            tmp = data.imgList.map(datum => {
+                return `<li class="list-group-item qiniu-tm-listitem-choose ${(datum == data.tmpName)?'list-group-item-success':''}" data-filename="${datum || ''}">
+                            ${datum} ${(datum == data.tmpName)?'（标准模版）':''}
+                            <button type="button" class="close" aria-label="Close">
+                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
+                            </button>
+                        </li>`
+            });
             tmp = tmp.join('');
         }
         document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp;
@@ -247,44 +215,51 @@ document.querySelector('#qiniu_tm_chooseclass').addEventListener("change", funct
 
         document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
             let fileName = e.target.dataset.filename;
-            let postBody = {
-                headers: { 
-                    "Content-Type": "application/json"
-                },
-                method: 'POST',
-                body: JSON.stringify({'fileName': fileName})
-            }
-
-            fetch('getdetail', postBody).then(e => e.json()).then(e => {
-                e.data.forEach(e => DATA.push(e));
-                isNew = false;
-                document.querySelector('#qiniu_tm_templatename').value = fileName;
-                let imgURL = '/file/imgs/' + fileName + '.png';
+            if(e.target.getAttribute('class').indexOf('list-group-item-success') > -1){
+                let postBody = {
+                    headers: { 
+                        "Content-Type": "application/json"
+                    },
+                    method: 'POST',
+                    body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
+                }
+    
+                fetch('getdetail', postBody).then(e => e.json()).then(e => {
+                    e.data.forEach(e => DATA.push(e));
+                    let imgURL = '/file/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
+                    document.querySelector('#qiniu_tm_img').src = imgURL;
+                    let promise = labeltool.init(imgURL);
+                    promise.then(e => {
+                        let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+                        let imgContainer = document.querySelector('#qiniu_tm_img');
+                        svgContainer.style.height = imgContainer.clientHeight;
+                        labeltool.inputBBox(DATA)
+                    });
+                });
+            } else {
+                let imgURL = '/file/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
                 document.querySelector('#qiniu_tm_img').src = imgURL;
                 let promise = labeltool.init(imgURL);
+                promise.then(e => {
+                    let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+                    let imgContainer = document.querySelector('#qiniu_tm_img');
+                    svgContainer.style.height = imgContainer.clientHeight;
+                    labeltool.inputBBox(DATA)
+                });
+            }
+            
+            
 
-                document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-                document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-                promise.then(e => labeltool.inputBBox(DATA));
-            });
-            // let ind = LIST.findIndex(e => e.fileName == fileName);
-            // if(ind > -1) {
-            //     LIST[ind].data.forEach(e => DATA.push(e));
-
-            //     isNew = false;
-            //     document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
-            //     document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-            //     let promise = labeltool.init('/file/imgs/' + fileName);
-
-            //     document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-            //     document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-            //     promise.then(e => labeltool.inputBBox(DATA));
-            // }
+            document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+            document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+            document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').removeAttribute('disabled');
+            document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').removeAttribute('disabled');
+            document.querySelector('#qiniu_tm_imgcontainer_title_classname').innerHTML = document.querySelector('#qiniu_tm_chooseclass').value;
+            document.querySelector('#qiniu_tm_imgcontainer_title_filename').innerHTML = fileName;
+ 
         }));
     });
-});
+}
 
 function setKeyFun(e) {
     e.stopPropagation();
@@ -306,10 +281,6 @@ function setValueFun(e) {
     DATA[ind].node.setAttribute('stroke', '#28a745');
     DATA[ind].node.setAttribute('fill', '#28a745');
     refreshList(document.querySelector("#qiniu_tm_contentfiller"), DATA);
-}
-
-function loadClassList () {
-    refreshSelector();
 }
 
 function refreshSelector() {
@@ -430,46 +401,27 @@ function loadPageServer () {
 // });
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').addEventListener('click', function(e) {
-    location.reload();
+    reloadLabelTool();
+    refreshImgList();
+    document.querySelector("#qiniu_tm_listcontainer").hidden = false;
+    document.querySelector("#qiniu_tm_imgcontainer").hidden = true;
+    document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').setAttribute('disabled', 'disabled');
+    document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').setAttribute('disabled', 'disabled');
 });
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener('click', function(e) {
-    let fileName = document.querySelector('#qiniu_tm_templatename').value;
-    if(fileName.length == 0 && isNew) return;
-
-    if(isNew) {
-        let imgURL = window.URL.createObjectURL(document.querySelector('#qiniu_tm_imgselector').files[0]);
-        let img = new Image();
-        img.src = imgURL;
-        img.onload = function() {
-            let imgData = getBase64Image(img);
-            // console.log(data);
-            let postBody = {
-                headers: { 
-                    "Content-Type": "application/json"
-                },
-                method: 'POST',
-                body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': imgData})
-            }
-    
-            fetch('/submitseperate', postBody).then(function (response) {
-                console.log('response: ', response);
-            });
-        }
-    } else {
-        let postBody = {
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            method: 'POST',
-            body: JSON.stringify({'fileName': fileName, 'data': DATA, 'imgs': ''})
-        }
-
-        fetch('/submitseperate', postBody).then(function (response) {
-            console.log('response: ', response);
-        });
+    let fileName = document.querySelector('#qiniu_tm_chooseclass').value;
+    let postBody = {
+        headers: { 
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify({'fileName': fileName, 'tmpName': document.querySelector('#qiniu_tm_imgcontainer_title_filename').textContent, 'data': DATA})
     }
-    
+
+    fetch('/submitseperate', postBody).then(function (response) {
+        console.log('response: ', response);
+    });
 });
 
 function getBase64Image(img) {

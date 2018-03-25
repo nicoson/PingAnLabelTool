@@ -39,9 +39,15 @@ section #qiniu_tm_leftpanel #qiniu_tm_imgcontainer {
   position: relative;
   overflow: auto;
 }
+section #qiniu_tm_leftpanel #qiniu_tm_imgcontainer > p {
+  height: 5%;
+  margin: 0;
+}
 section #qiniu_tm_leftpanel #qiniu_tm_imgcontainer > div {
   border: 1px solid grey;
   position: relative;
+  height: 95%;
+  overflow: auto;
 }
 section #qiniu_tm_leftpanel #qiniu_tm_img {
   width: 100%;

@@ -40,6 +40,14 @@ class labelTool {
         })
     }
 
+    destory() {
+        this.svgContainer.parentElement.removeChild(this.svgContainer);
+        let svgNode = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgNode.setAttribute('id', 'qiniu_tm_imgmarker');
+        this.imgContainer.src="";
+        this.imgContainer.parentElement.appendChild(svgNode);
+    }
+
     startTrace() {
         createEvents();
     }
@@ -156,7 +164,7 @@ class labelTool {
 
     inputBBox(datalist) {
         this.datalist = datalist;
-        this.count = (datalist.slice(-1)[0].id != undefined) ? (datalist.slice(-1)[0].id + 1) : 0;
+        this.count = datalist.slice(-1).length ? (datalist.slice(-1)[0].id + 1) : 0;
 
         this.datalist.forEach(function(datum) {
             let points =   `${datum.bbox[0][0]/this.stretchRate},${datum.bbox[0][1]/this.stretchRate} 

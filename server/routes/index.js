@@ -103,9 +103,17 @@ router.post('/getImglist', function(req, res, next) {
   if(fs.existsSync(filedir)) {
     let file = fs.readdirSync('public/file/' + req.body.fileName);
     console.log(file);
-    res.send(file);
+    let conf = JSON.parse(fs.readFileSync('public/file/' + req.body.fileName + '.json'));
+    console.log(conf);
+    res.send({
+      imgList: file,
+      tmpName: conf.fileName
+    });
   }
-  res.send([]);
+  res.send({
+    imgList: [],
+    tmpName: ''
+  });
 });
 
 router.post('/getdetail', function(req, res, next) {
@@ -121,7 +129,10 @@ router.post('/createnewclass', function(req, res, next) {
   if(req.body.fileName.length) {
     let fileName = 'public/file/' + req.body.fileName + '.json';
     if(!fs.existsSync(fileName)) {
-      fs.writeFileSync(fileName, JSON.stringify([]), 'utf8');
+      fs.writeFileSync(fileName, JSON.stringify({
+        fileName: req.body.fileName,
+        data: []
+      }), 'utf8');
     }
   }
   res.send('done');
@@ -129,17 +140,10 @@ router.post('/createnewclass', function(req, res, next) {
 
 router.post('/submitseperate', function(req, res, next) {
   console.log(req.body.fileName);
-  let imgFileName = req.body.fileName + '.png';
   let labelFileDir = 'public/file/' + req.body.fileName + '.json';
 
-  console.log('img name: ',req.body.imgs);
-  if(req.body.imgs != '') {
-    var dataBuffer = new Buffer(req.body.imgs, 'base64');
-    fs.writeFileSync("public/file/imgs/" + imgFileName, dataBuffer);
-  }
-
   fs.writeFileSync(labelFileDir, JSON.stringify({
-    fileName: req.body.fileName,
+    fileName: req.body.tmpName,
     data: req.body.data
   }), 'utf8');
   res.send('success');
