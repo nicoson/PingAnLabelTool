@@ -22,23 +22,74 @@
         <div class="row">
             <div id='qiniu_tm_leftpanel' class="col-8">
                 <div id="qiniu_tm_listcontainer">
-                    <p>新建样本票据：</p>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="qiniu_tm_templatename">票据模版名称</label>
+                    <div class="form-group row">
+                        <label for="" class="col-sm-3 col-form-label col-form-label-lg">新建票据类型:</label>
+                        <div class="col-sm-9">
+                            <button id="qiniu_tm_createnewclass" type="button" class="btn btn-primary" data-toggle="modal" data-target="#qiniu_tm_createnewclass_modal">新建</button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="qiniu_tm_createnewclass_modal" tabindex="-1" role="dialog" aria-labelledby="qiniu_tm_createnewclass" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">新建票据类型</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <label class="input-group-text" for="qiniu_tm_templatename">票据模版名称</label>
+                                                </div>
+                                                <input id="qiniu_tm_templatename" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                            <button id="qiniu_tm_createnewclass_submit" type="button" class="btn btn-primary">创建</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <input id="qiniu_tm_templatename" type="text" class="form-control" />
                     </div>
-                    <div class="input-group mb-3">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" id='qiniu_tm_imgselector' ／>
-                            <label class="custom-file-label" for="qiniu_tm_imgselector">选择票据样张</label>
+
+                    <form action="/uploadimgs" method="POST" enctype="multipart/form-data">
+                        <div class="form-group row">
+                            <label for="colFormLabelLg" class="col-sm-3 col-form-label col-form-label-lg">选择当前票据类型:</label>
+                            <div class="col-sm-9">
+                                <div class="input-group mb-3">
+                                    <select class="custom-select" id="qiniu_tm_chooseclass" name="foldername"></select>
+                                    <div class="input-group-append">
+                                        <label class="input-group-text" for="qiniu_tm_chooseclass">Options</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group row">
+                            <label for="qiniu_tm_uploadimg_selector" class="col-sm-3 col-form-label col-form-label-lg">上传标注、训练样本:</label>
+                            <div class="col-sm-9">
+                                <div class="input-group mb-3">
+                                    <div class="input-group mb-3">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id='qiniu_tm_imgselector' name="uploadimgs" multiple="multiple" />
+                                            <label id="qiniu_tm_uploadimg_label" class="custom-file-label" for="inputGroupFile02">Choose file</label>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <input class="btn btn-primary" type="submit" value="上传" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+
+
                     <br />
-                    <p>
-                        当前已标注的票据:
-                    </p>
+                    <h5>
+                        训练数据集:
+                    </h5>
                     <div id="qiniu_tm_listcontainer_list" class="list-group">
                         <ul class="list-group"></ul>
                     </div>
@@ -83,8 +134,8 @@
         <p>@right reserved by Qiniu.com</p>
     </footer>
 
-    <!-- <script src="./libs/js/jquery.min.js"></script> -->
-    <!-- <script src="./libs/js/bootstrap.min.js"></script> -->
+    <script src="./libs/js/jquery.min.js"></script>
+    <script src="./libs/js/bootstrap.min.js"></script>
     <script src="./javascript/labeltool.js"></script>
     <script src="./javascript/app.js" defer></script>
 </body>

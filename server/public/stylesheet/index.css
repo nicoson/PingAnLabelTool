@@ -30,6 +30,9 @@ section #qiniu_tm_leftpanel {
 			width: 100%;
 		} */
 }
+section #qiniu_tm_leftpanel #qiniu_tm_uploadimg_label {
+  overflow: hidden;
+}
 section #qiniu_tm_leftpanel #qiniu_tm_imgcontainer {
   width: 100%;
   height: 100%;

@@ -37,17 +37,29 @@ window.onload = function() {
 
     //  load list on the server
     // loadPagelocal();
-    loadPageServer();
+    // loadPageServer();
+    loadClassList();
 
     // binding change event for image container
     document.querySelector("#qiniu_tm_imgcontainer").hidden = true;
     document.querySelector('#qiniu_tm_imgselector').addEventListener('change', function(e) {
-        let imgData = window.URL.createObjectURL(e.target.files[0]);
-        document.querySelector('#qiniu_tm_img').src = imgData;
-        labeltool.init(imgData);
+        if(e.target.files.length) {
+            let namelist = [];
+            for(let i=0; i<e.target.files.length; i++) {
+                namelist.push(e.target.files[i].name);
 
-        document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-        document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+                let imgURL = window.URL.createObjectURL(e.target.files[i]);
+                let img = new Image();
+                img.src = imgURL;
+                let imgData = getBase64Image(img);
+            }
+    
+            document.querySelector('#qiniu_tm_uploadimg_label').textContent = namelist.join('; ');
+        }
+        
+
+        // document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+        // document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
 
         // let FILENAME = document.querySelector("#qiniu_tm_templatename").value;
         // let ind = odata.findIndex(e => e.fileName == FILENAME);
@@ -171,6 +183,109 @@ document.querySelectorAll('#qiniu_tm_detailpanel_toolbox label')[2].addEventList
     document.querySelectorAll('polygon').forEach(e => e.removeEventListener('click', setKeyFun));
 });
 
+document.querySelector("#qiniu_tm_createnewclass").addEventListener("click", function(e) {
+    $('#qiniu_tm_createnewclass_modal').modal('toggle');
+});
+
+document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('click', function(e) {
+    let postBody = {
+        headers: { 
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_templatename').value})
+    }
+
+    fetch('createnewclass', postBody).then(e => {
+        console.log(e);
+        refreshSelector();
+        $('#qiniu_tm_createnewclass_modal').modal('toggle');
+    });
+});
+
+document.querySelector('#qiniu_tm_chooseclass').addEventListener("change", function(e) {
+    let postBody = {
+        headers: { 
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify({'fileName': e.target.value})
+    }
+
+    fetch('getImglist', postBody).then(e => e.json()).then(data => {
+        let tmp = "";
+        if(data.length) {
+            tmp = data.map(datum => {datum = datum.replace('.json', ''); return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
+                                            ${datum}
+                                            <button type="button" class="close" aria-label="Close">
+                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
+                                            </button>
+                                        </li>`});
+            tmp = tmp.join('');
+        }
+        document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp;
+
+        document.querySelectorAll(".js-qiniu-tm-listitem-remove").forEach(ele => ele.addEventListener("click", function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            let conf = confirm("您确定要删除这个模版吗？");
+            if(conf == true) {
+                let postBody = {
+                    headers: { 
+                        "Content-Type": "application/json"
+                    },
+                    method: 'POST',
+                    body: JSON.stringify({'fileName': e.target.dataset.filename})
+                }
+    
+                fetch('/removeseperate', postBody).then(function (response) {
+                    console.log('response: ', response);
+                    location.reload();
+                });
+            }
+        }));
+
+        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
+            let fileName = e.target.dataset.filename;
+            let postBody = {
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                method: 'POST',
+                body: JSON.stringify({'fileName': fileName})
+            }
+
+            fetch('getdetail', postBody).then(e => e.json()).then(e => {
+                e.data.forEach(e => DATA.push(e));
+                isNew = false;
+                document.querySelector('#qiniu_tm_templatename').value = fileName;
+                let imgURL = '/file/imgs/' + fileName + '.png';
+                document.querySelector('#qiniu_tm_img').src = imgURL;
+                let promise = labeltool.init(imgURL);
+
+                document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+                document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+
+                promise.then(e => labeltool.inputBBox(DATA));
+            });
+            // let ind = LIST.findIndex(e => e.fileName == fileName);
+            // if(ind > -1) {
+            //     LIST[ind].data.forEach(e => DATA.push(e));
+
+            //     isNew = false;
+            //     document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
+            //     document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
+            //     let promise = labeltool.init('/file/imgs/' + fileName);
+
+            //     document.querySelector("#qiniu_tm_listcontainer").hidden = true;
+            //     document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
+
+            //     promise.then(e => labeltool.inputBBox(DATA));
+            // }
+        }));
+    });
+});
+
 function setKeyFun(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -193,33 +308,19 @@ function setValueFun(e) {
     refreshList(document.querySelector("#qiniu_tm_contentfiller"), DATA);
 }
 
+function loadClassList () {
+    refreshSelector();
+}
 
-// function loadPagelocal () {
-//     let data = localStorage.data ? JSON.parse(localStorage.data) : [];
-//     if(data.length != 0) {
-//         let tmp = data.reverse().map(datum => {return `<li class="list-group-item">
-//                                             ${datum.fileName}
-//                                             <button type="button" class="close" aria-label="Close">
-//                                                 <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum.fileName || ''}">&times;</span>
-//                                             </button>
-//                                         </li>`});
-//         document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
-//     }
-    
-
-//     let cateSelector = localStorage.cate ? localStorage.cate : null;
-//     if(cateSelector != null) {
-//         document.querySelector('#qiniu_tm_cateselector').value = cateSelector;
-//     }
-
-//     document.querySelectorAll(".js-qiniu-tm-listitem-remove").forEach(ele => ele.addEventListener("click", function(e) {
-//         let odata = localStorage.data ? JSON.parse(localStorage.data) : [];
-//         let ind = odata.findIndex(t => t.fileName == e.target.dataset.filename);
-//         odata.splice(ind, 1);
-//         localStorage.data = JSON.stringify(odata);
-//         location.reload();
-//     }));
-// }
+function refreshSelector() {
+    fetch('/getfilelist').then(e => e.json()).then(function(data) {
+        let tmp = data.map(datum => {
+            datum = datum.replace('.json', '');
+            return `<option value="${datum}">${datum}</option>`
+        });
+        document.querySelector('#qiniu_tm_chooseclass').innerHTML = tmp.join('');
+    });
+}
 
 function loadPageServer () {
     fetch('/getfilelist').then(e => e.json()).then(function(data) {
