@@ -150,19 +150,23 @@ document.querySelector("#qiniu_tm_createnewclass").addEventListener("click", fun
 });
 
 document.querySelector("#qiniu_tm_class_delete").addEventListener("click", function(e) {
-    let postBody = {
-        headers: { 
-            "Content-Type": "application/json"
-        },
-        method: 'POST',
-        body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
-    }
+    let conf = confirm("您确定要删除这个分类及其所有样本数据吗？");
+        if(conf == true) {
+        let postBody = {
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            method: 'POST',
+            body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
+        }
 
-    fetch('deleteclass', postBody).then(e => {
-        console.log(e);
-        refreshSelector();
-        // $('#qiniu_tm_createnewclass_modal').modal('toggle');
-    });
+        fetch('deleteclass', postBody).then(e => {
+            console.log(e);
+            localStorage.removeItem('chosenclass');
+            refreshSelector();
+            // $('#qiniu_tm_createnewclass_modal').modal('toggle');
+        });
+    }
 });
 
 document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('click', function(e) {
@@ -182,6 +186,7 @@ document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('clic
 });
 
 document.querySelector('#qiniu_tm_chooseclass').addEventListener("change", function(e) {
+    localStorage.setItem('chosenclass', e.target.value);
     refreshImgList();
 });
 
@@ -309,6 +314,9 @@ function refreshSelector() {
             return `<option value="${datum}">${datum}</option>`
         });
         document.querySelector('#qiniu_tm_chooseclass').innerHTML = tmp.join('');
+        if(localStorage.getItem('chosenclass')) {
+            document.querySelector('#qiniu_tm_chooseclass').value = localStorage.getItem('chosenclass');
+        }
         refreshImgList();
     });
 }
