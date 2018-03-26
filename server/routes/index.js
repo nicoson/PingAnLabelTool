@@ -4,7 +4,18 @@ var fs = require('fs');
 var path = require('path');
 var multer  = require('multer');
 const UPLOAD_PATH = './public/file/';
-var upload = multer({ dest: UPLOAD_PATH })
+var upload = multer({ dest: UPLOAD_PATH });
+
+let COUNTER = 0;
+let countfiledir = 'public/file/counter.json';
+if(fs.existsSync(countfiledir)){
+  COUNTER = JSON.parse(fs.readFileSync(countfiledir));
+  COUNTER = COUNTER.count;
+}
+
+function updateCounter() {
+  fs.writeFile(countfiledir, JSON.stringify({count: COUNTER}), 'utf8', e => console.log('counter file updated'));
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -64,29 +75,29 @@ router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) 
   });
 });
 
-router.post('/submit', function(req, res, next) {
-  console.log(req.body.fileName);
-  let fileName = req.body.fileName + '.png';
-  let labelFile = 'public/file/label.json';
+// router.post('/submit', function(req, res, next) {
+//   console.log(req.body.fileName);
+//   let fileName = req.body.fileName + '.png';
+//   let labelFile = 'public/file/label.json';
 
-  let odata = JSON.parse(fs.readFileSync(labelFile));
-  let ind = odata.findIndex(e => e.fileName == fileName);
-  if(ind > -1) {
-    odata[ind].data = req.body.data;
-  } else {
-    odata.push({
-      fileName: fileName,
-      data: req.body.data
-    });
+//   let odata = JSON.parse(fs.readFileSync(labelFile));
+//   let ind = odata.findIndex(e => e.fileName == fileName);
+//   if(ind > -1) {
+//     odata[ind].data = req.body.data;
+//   } else {
+//     odata.push({
+//       fileName: fileName,
+//       data: req.body.data
+//     });
     
-    var dataBuffer = new Buffer(req.body.imgs, 'base64');
-    fs.writeFileSync("public/file/imgs/" + fileName, dataBuffer);
-    res.send("保存成功！");
-  }
+//     var dataBuffer = new Buffer(req.body.imgs, 'base64');
+//     fs.writeFileSync("public/file/imgs/" + fileName, dataBuffer);
+//     res.send("保存成功！");
+//   }
 
-  fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
-  res.send('success');
-});
+//   fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
+//   res.send('success');
+// });
 
 
 // =========================================
@@ -95,7 +106,7 @@ router.post('/submit', function(req, res, next) {
 router.get('/getfilelist', function(req, res, next) {
   let file = fs.readdirSync('public/file/');
   console.log(file);
-  res.send(file.filter(e => e.indexOf('.json') > -1));
+  res.send(file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0}));
 });
 
 router.post('/getImglist', function(req, res, next) {
@@ -129,16 +140,40 @@ router.post('/createnewclass', function(req, res, next) {
   if(req.body.fileName.length) {
     let fileName = 'public/file/' + req.body.fileName + '.json';
     if(!fs.existsSync(fileName)) {
+      COUNTER ++;
       fs.writeFileSync(fileName, JSON.stringify({
         fileName: req.body.fileName,
+        label: COUNTER,
         data: []
       }), 'utf8');
+    }
+    updateCounter();
+  }
+  res.send('done');
+});
+
+router.post('/deleteclass', function(req, res, next) {
+  console.log(req.body.fileName);
+  console.log('public/file/' + req.body.fileName + '.json');
+  if(req.body.fileName.length) {
+    let fileName = 'public/file/' + req.body.fileName + '.json';
+    let filedir = 'public/file/' + req.body.fileName;
+    if(fs.existsSync(fileName)) {
+      fs.unlinkSync(fileName);
+    }
+
+    if(fs.existsSync(filedir)) {
+      let imgs = fs.readdirSync(filedir);
+      imgs.forEach(e => {
+        fs.unlinkSync(filedir + '/' + e);
+      });
+      fs.rmdir(filedir, e => console.log(filedir + ' removed'));
     }
   }
   res.send('done');
 });
 
-router.post('/submitseperate', function(req, res, next) {
+router.post('/submit', function(req, res, next) {
   console.log(req.body.fileName);
   let labelFileDir = 'public/file/' + req.body.fileName + '.json';
 
@@ -149,12 +184,65 @@ router.post('/submitseperate', function(req, res, next) {
   res.send('success');
 });
 
-router.post('/removeseperate', function(req, res, next) {
-  let labelFile = 'public/file/' + req.body.fileName + '.json';
-  let imgFileName = "public/file/imgs/" + req.body.fileName + '.png';
-  fs.unlinkSync(labelFile);
+router.post('/removeimg', function(req, res, next) {
+  let imgFileName = "public/file/" + req.body.className + '/' + req.body.fileName;
   fs.unlinkSync(imgFileName);
   res.send('done');
+});
+
+router.get('/getClassifyModelConf', function(req, res, next) {
+  let filedir = 'public/file/';
+  let file = fs.readdirSync(filedir);
+  file = file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0});
+  let classList = [];
+  
+  file.map(e => {
+    let tmp = JSON.parse(fs.readFileSync(filedir + e));
+    let label = tmp.label;
+    let name = e.replace('.json', '');
+    let path = e.replace('.json', '');
+    
+    let topTitle = [];
+    let subTitle = [];
+    let contentType = [];
+    let keywords = [];
+
+    tmp.data.map(e => {
+      console.log(e.classtype)
+      switch(e.classtype) {
+        case 'key':
+          keywords.push(e.content);
+          break;
+        case 'title':
+          topTitle.push(e.content);
+          break;
+        case 'subtitle':
+          subTitle.push(e.content);
+          break;
+        case 'contenttype':
+          contentType.push(e.content);
+          break;
+        default:
+          break;
+      }
+    });
+
+    console.log(keywords);
+
+    classList.push({
+      counter: COUNTER,
+      classes: {
+        label: label,
+        name: name,
+        path: path,
+        topTitle: topTitle,
+        subTitle: subTitle,
+        contentType: contentType,
+        keywords: keywords
+      }
+    });
+  });
+  res.send(classList);
 });
 
 module.exports = router;

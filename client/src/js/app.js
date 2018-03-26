@@ -149,6 +149,22 @@ document.querySelector("#qiniu_tm_createnewclass").addEventListener("click", fun
     $('#qiniu_tm_createnewclass_modal').modal('toggle');
 });
 
+document.querySelector("#qiniu_tm_class_delete").addEventListener("click", function(e) {
+    let postBody = {
+        headers: { 
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
+    }
+
+    fetch('deleteclass', postBody).then(e => {
+        console.log(e);
+        refreshSelector();
+        // $('#qiniu_tm_createnewclass_modal').modal('toggle');
+    });
+});
+
 document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('click', function(e) {
     let postBody = {
         headers: { 
@@ -203,12 +219,15 @@ function refreshImgList() {
                         "Content-Type": "application/json"
                     },
                     method: 'POST',
-                    body: JSON.stringify({'fileName': e.target.dataset.filename})
+                    body: JSON.stringify({
+                        'className': document.querySelector('#qiniu_tm_chooseclass').value,
+                        'fileName': e.target.dataset.filename
+                    })
                 }
     
-                fetch('/removeseperate', postBody).then(function (response) {
+                fetch('/removeimg', postBody).then(function (response) {
                     console.log('response: ', response);
-                    location.reload();
+                    refreshImgList();
                 });
             }
         }));
@@ -290,6 +309,7 @@ function refreshSelector() {
             return `<option value="${datum}">${datum}</option>`
         });
         document.querySelector('#qiniu_tm_chooseclass').innerHTML = tmp.join('');
+        refreshImgList();
     });
 }
 
@@ -419,7 +439,7 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
         body: JSON.stringify({'fileName': fileName, 'tmpName': document.querySelector('#qiniu_tm_imgcontainer_title_filename').textContent, 'data': DATA})
     }
 
-    fetch('/submitseperate', postBody).then(function (response) {
+    fetch('/submit', postBody).then(function (response) {
         console.log('response: ', response);
     });
 });

@@ -148,6 +148,7 @@ class labelTool {
                 this.currentNode.setAttribute('data-id', this.count);
                 let outputdata = {
                     id: this.count,
+                    classtype: 'key',
                     node: this.currentNode.cloneNode(true),
                     bbox: this.currentNode.getAttribute('points').split(' ').map(e => e.split(',')).map(e => e.map(e => e*this.stretchRate)),
                     isKey: false
