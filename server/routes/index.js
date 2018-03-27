@@ -230,8 +230,6 @@ router.get('/getClassifyModelConf', function(req, res, next) {
     console.log(keywords);
 
     classList.push({
-      counter: COUNTER,
-      classes: {
         label: label,
         name: name,
         path: path,
@@ -239,10 +237,12 @@ router.get('/getClassifyModelConf', function(req, res, next) {
         subTitle: subTitle,
         contentType: contentType,
         keywords: keywords
-      }
     });
   });
-  res.send(classList);
+  res.send({
+    counter: COUNTER,
+    classes: classList
+  });
 });
 
 module.exports = router;
