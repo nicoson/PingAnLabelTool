@@ -2,4 +2,4 @@ node_modules/
 dev/
 dist/
 bower_components/
-server/public/file/*
+server/public/file/
