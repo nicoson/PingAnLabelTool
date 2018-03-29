@@ -22,6 +22,14 @@ app.use(bodyParser.urlencoded({ extended: false ,limit: '500mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.all('*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By",' 3.2.1')
+  res.header("Content-Type", "application/json;charset=utf-8");
+  next();
+});
 app.use('/', index);
 app.use('/users', users);
 
@@ -43,10 +51,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// var port = process.env.PORT || 4000;
-// app.set('port', port);
-// app.listen(port, function () {
-//   console.log('Example app listening on port ' + port + '!');
-// });
+var port = process.env.PORT || 9000;
+app.set('port', port);
+app.listen(port, function () {
+  console.log('Example app listening on port ' + port + '!');
+});
 
 module.exports = app;

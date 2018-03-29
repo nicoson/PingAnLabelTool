@@ -106,7 +106,7 @@ router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) 
 router.get('/getfilelist', function(req, res, next) {
   let file = fs.readdirSync('public/file/');
   console.log(file);
-  res.send(file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0}));
+  res.send(file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0 && e.indexOf('classes_info.json') < 0}));
 });
 
 router.post('/getImglist', function(req, res, next) {
@@ -191,9 +191,29 @@ router.post('/removeimg', function(req, res, next) {
 });
 
 router.get('/getClassifyModelConf', function(req, res, next) {
+  res.send(updateTrainingConf());
+});
+
+router.get('/trainingstatus', function(req, res, next) {
+  res.send({status: 0});
+});
+
+router.get('/starttraining', function(req, res, next) {
+  res.send('done');
+});
+
+router.get('/saveouttrainingconf', function(req, res, next) {
+  let conf = updateTrainingConf();
+  console.log(conf);
+  fs.writeFileSync('public/file/classes_info.json', JSON.stringify(conf));
+  res.send('done');
+});
+
+
+function updateTrainingConf() {
   let filedir = 'public/file/';
   let file = fs.readdirSync(filedir);
-  file = file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0});
+  file = file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0 && e.indexOf('classes_info.json') < 0});
   let classList = [];
   
   file.map(e => {
@@ -239,10 +259,10 @@ router.get('/getClassifyModelConf', function(req, res, next) {
         keywords: keywords
     });
   });
-  res.send({
+  return {
     counter: COUNTER,
     classes: classList
-  });
-});
+  };
+}
 
 module.exports = router;

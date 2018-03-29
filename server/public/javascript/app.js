@@ -45,6 +45,21 @@ window.onload = function() {
             document.querySelector('#qiniu_tm_uploadimg_label').textContent = namelist.join('; ');
         }
     });
+
+    checkTrainingStatus();
+    setInterval(checkTrainingStatus, 30000);
+}
+
+function checkTrainingStatus () {
+    fetch('http://0.0.0.0:9000/trainingstatus').then(e => e.json()).then(e => {
+        if(e.status == 0) {
+            document.querySelector('#qiniu_tm_class_training').textContent = '开始训练';
+            document.querySelector('#qiniu_tm_class_training').removeAttribute('disabled');
+        } else {
+            document.querySelector('#qiniu_tm_class_training').textContent = '模型训练中... ...';
+            document.querySelector('#qiniu_tm_class_training').setAttribute('disabled', 'disabled');
+        }
+    });
 }
 
 function reloadLabelTool() {
@@ -188,6 +203,18 @@ document.querySelector('#qiniu_tm_createnewclass_submit').addEventListener('clic
 document.querySelector('#qiniu_tm_chooseclass').addEventListener("change", function(e) {
     localStorage.setItem('chosenclass', e.target.value);
     refreshImgList();
+});
+
+document.querySelector('#qiniu_tm_class_training').addEventListener("click", function(e) {
+    let conf = confirm("训练过程将耗时30分钟，确定要开启新的训练？");
+    if(conf == true) {
+        fetch('/saveouttrainingconf').then(e => {
+            fetch('http://0.0.0.0:9000/starttraining').then(e => {
+                document.querySelector('#qiniu_tm_class_training').textContent = '模型训练中... ...';
+                document.querySelector('#qiniu_tm_class_training').setAttribute('disabled', 'disabled');
+            });
+        });
+    }
 });
 
 function refreshImgList() {
