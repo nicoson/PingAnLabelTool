@@ -51,7 +51,7 @@ window.onload = function() {
 }
 
 function checkTrainingStatus () {
-    fetch('http://0.0.0.0:9000/trainingstatus').then(e => e.json()).then(e => {
+    fetch('http://0.0.0.0:7890/trainingstatus').then(e => e.json()).then(e => {
         if(e.status == 0) {
             document.querySelector('#qiniu_tm_class_training').textContent = '开始训练';
             document.querySelector('#qiniu_tm_class_training').removeAttribute('disabled');
@@ -209,7 +209,7 @@ document.querySelector('#qiniu_tm_class_training').addEventListener("click", fun
     let conf = confirm("训练过程将耗时30分钟，确定要开启新的训练？");
     if(conf == true) {
         fetch('/saveouttrainingconf').then(e => {
-            fetch('http://0.0.0.0:9000/starttraining').then(e => {
+            fetch('http://0.0.0.0:7890/starttraining').then(e => {
                 document.querySelector('#qiniu_tm_class_training').textContent = '模型训练中... ...';
                 document.querySelector('#qiniu_tm_class_training').setAttribute('disabled', 'disabled');
             });
@@ -277,7 +277,7 @@ function refreshImgList() {
     
                 fetch('getdetail', postBody).then(e => e.json()).then(e => {
                     e.data.forEach(e => DATA.push(e));
-                    let imgURL = '/file/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
+                    let imgURL = '/file/imgs/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
                     document.querySelector('#qiniu_tm_img').src = imgURL;
                     let promise = labeltool.init(imgURL);
                     promise.then(e => {
@@ -288,7 +288,7 @@ function refreshImgList() {
                     });
                 });
             } else {
-                let imgURL = '/file/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
+                let imgURL = '/file/imgs/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
                 document.querySelector('#qiniu_tm_img').src = imgURL;
                 let promise = labeltool.init(imgURL);
                 promise.then(e => {

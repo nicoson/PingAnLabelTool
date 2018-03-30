@@ -3,7 +3,7 @@ var router = express.Router();
 var fs = require('fs');
 var path = require('path');
 var multer  = require('multer');
-const UPLOAD_PATH = './public/file/';
+const UPLOAD_PATH = './public/file/imgs/';
 var upload = multer({ dest: UPLOAD_PATH });
 
 let COUNTER = 0;
@@ -28,24 +28,24 @@ router.get('/getlist', function(req, res, next) {
   res.send(file);
 });
 
-router.post('/remove', function(req, res, next) {
-  let labelFile = 'public/file/label.json';
-  let odata = JSON.parse(fs.readFileSync(labelFile));
-  console.log(odata);
-  let ind = odata.findIndex(e => e.fileName == req.body.fileName);
-  console.log(ind);
-  if(ind > -1) {
-    odata.splice(ind, 1);
-    console.log(odata);
-    fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
-    console.log('odata');
-    let fn = "public/file/imgs/" + req.body.fileName;
-    fs.unlink("public/file/imgs/" + req.body.fileName);
+// router.post('/remove', function(req, res, next) {
+//   let labelFile = 'public/file/label.json';
+//   let odata = JSON.parse(fs.readFileSync(labelFile));
+//   console.log(odata);
+//   let ind = odata.findIndex(e => e.fileName == req.body.fileName);
+//   console.log(ind);
+//   if(ind > -1) {
+//     odata.splice(ind, 1);
+//     console.log(odata);
+//     fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
+//     console.log('odata');
+//     let fn = "public/file/imgs/" + req.body.fileName;
+//     fs.unlink("public/file/imgs/" + req.body.fileName);
 
-    console.log('bb');
-  }
-  res.send('success');
-});
+//     console.log('bb');
+//   }
+//   res.send('success');
+// });
 
 router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) {
   const files  = req.files;
@@ -69,6 +69,7 @@ router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) 
   });
 
   result.then(r => {
+    res.type('html');
     res.render('index');
   }).catch(err => {
     res.json({ err });
@@ -110,9 +111,9 @@ router.get('/getfilelist', function(req, res, next) {
 });
 
 router.post('/getImglist', function(req, res, next) {
-  let filedir = 'public/file/' + req.body.fileName;
+  let filedir = 'public/file/imgs/' + req.body.fileName;
   if(fs.existsSync(filedir)) {
-    let file = fs.readdirSync('public/file/' + req.body.fileName);
+    let file = fs.readdirSync('public/file/imgs/' + req.body.fileName);
     console.log(file);
     let conf = JSON.parse(fs.readFileSync('public/file/' + req.body.fileName + '.json'));
     console.log(conf);
@@ -157,7 +158,7 @@ router.post('/deleteclass', function(req, res, next) {
   console.log('public/file/' + req.body.fileName + '.json');
   if(req.body.fileName.length) {
     let fileName = 'public/file/' + req.body.fileName + '.json';
-    let filedir = 'public/file/' + req.body.fileName;
+    let filedir = 'public/file/imgs/' + req.body.fileName;
     if(fs.existsSync(fileName)) {
       fs.unlinkSync(fileName);
     }
@@ -185,7 +186,7 @@ router.post('/submit', function(req, res, next) {
 });
 
 router.post('/removeimg', function(req, res, next) {
-  let imgFileName = "public/file/" + req.body.className + '/' + req.body.fileName;
+  let imgFileName = "public/file/imgs/" + req.body.className + '/' + req.body.fileName;
   fs.unlinkSync(imgFileName);
   res.send('done');
 });
@@ -216,9 +217,9 @@ function updateTrainingConf() {
   file = file.filter(e => {return e.indexOf('.json') > -1 && e.indexOf('counter.json') < 0 && e.indexOf('classes_info.json') < 0});
   let classList = [];
   
-  file.map(e => {
+  file.map((e, index) => {
     let tmp = JSON.parse(fs.readFileSync(filedir + e));
-    let label = tmp.label;
+    let label = index;
     let name = e.replace('.json', '');
     let path = e.replace('.json', '');
     
