@@ -254,10 +254,10 @@ function updateTrainingConf() {
         label: label,
         name: name,
         path: path,
-        topTitle: topTitle,
-        subTitle: subTitle,
-        contentType: contentType,
-        keywords: keywords
+        topTitle: topTitle.length ? topTitle : [""],
+        subTitle: subTitle.length ? subTitle : [""],
+        contentType: contentType.length ? contentType : [""],
+        keywords: keywords.length ? keywords : [""]
     });
   });
   return {
