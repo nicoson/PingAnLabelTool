@@ -346,11 +346,11 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
         'fileName': document.querySelector('#qiniu_tm_imgcontainer_title_filename').textContent,
         'data': DATA
     }
-    let temp = LIST.filter(e => e.fileName == fileName);
+    let temp = LIST.filter(e => e.fileName == datum.fileName);
     if(temp.length == 0) {
         LIST.push(datum);
     } else {
-        temp.data = DATA
+        temp[0].data = DATA
     }
     let postBody = {
         headers: { 

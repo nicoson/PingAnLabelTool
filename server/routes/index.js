@@ -22,29 +22,10 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/getlist', function(req, res, next) {
-  let file = fs.readFileSync('public/file/label.json');
-  // console.log(file);
-  res.send(file);
-});
-
-// router.post('/remove', function(req, res, next) {
-//   let labelFile = 'public/file/label.json';
-//   let odata = JSON.parse(fs.readFileSync(labelFile));
-//   console.log(odata);
-//   let ind = odata.findIndex(e => e.fileName == req.body.fileName);
-//   console.log(ind);
-//   if(ind > -1) {
-//     odata.splice(ind, 1);
-//     console.log(odata);
-//     fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
-//     console.log('odata');
-//     let fn = "public/file/imgs/" + req.body.fileName;
-//     fs.unlink("public/file/imgs/" + req.body.fileName);
-
-//     console.log('bb');
-//   }
-//   res.send('success');
+// router.get('/getlist', function(req, res, next) {
+//   let file = fs.readFileSync('public/file/label.json');
+//   // console.log(file);
+//   res.send(file);
 // });
 
 router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) {
@@ -76,30 +57,6 @@ router.post('/uploadimgs', upload.array('uploadimgs'), function(req, res, next) 
   });
 });
 
-// router.post('/submit', function(req, res, next) {
-//   console.log(req.body.fileName);
-//   let fileName = req.body.fileName + '.png';
-//   let labelFile = 'public/file/label.json';
-
-//   let odata = JSON.parse(fs.readFileSync(labelFile));
-//   let ind = odata.findIndex(e => e.fileName == fileName);
-//   if(ind > -1) {
-//     odata[ind].data = req.body.data;
-//   } else {
-//     odata.push({
-//       fileName: fileName,
-//       data: req.body.data
-//     });
-    
-//     var dataBuffer = new Buffer(req.body.imgs, 'base64');
-//     fs.writeFileSync("public/file/imgs/" + fileName, dataBuffer);
-//     res.send("保存成功！");
-//   }
-
-//   fs.writeFileSync(labelFile, JSON.stringify(odata), 'utf8');
-//   res.send('success');
-// });
-
 
 // =========================================
 // second set
@@ -119,12 +76,12 @@ router.post('/getImglist', function(req, res, next) {
     console.log(conf);
     res.send({
       imgList: file,
-      tmpName: conf.fileName
+      label: conf
     });
   }
   res.send({
     imgList: [],
-    tmpName: ''
+    label: []
   });
 });
 
@@ -142,11 +99,11 @@ router.post('/createnewclass', function(req, res, next) {
     let fileName = 'public/file/' + req.body.fileName + '.json';
     if(!fs.existsSync(fileName)) {
       COUNTER ++;
-      fs.writeFileSync(fileName, JSON.stringify({
+      fs.writeFileSync(fileName, JSON.stringify([{
         fileName: req.body.fileName,
-        label: COUNTER,
+        // label: COUNTER,
         data: []
-      }), 'utf8');
+      }]), 'utf8');
     }
     updateCounter();
   }
@@ -178,10 +135,7 @@ router.post('/submit', function(req, res, next) {
   console.log(req.body.fileName);
   let labelFileDir = 'public/file/' + req.body.fileName + '.json';
 
-  fs.writeFileSync(labelFileDir, JSON.stringify({
-    fileName: req.body.tmpName,
-    data: req.body.data
-  }), 'utf8');
+  fs.writeFileSync(labelFileDir, JSON.stringify(req.body.data), 'utf8');
   res.send('success');
 });
 
@@ -191,6 +145,10 @@ router.post('/removeimg', function(req, res, next) {
   res.send('done');
 });
 
+
+// =====================================
+// Training related
+// =====================================
 router.get('/getClassifyModelConf', function(req, res, next) {
   res.send(updateTrainingConf());
 });

@@ -49,6 +49,7 @@
     "gulp-uglify": ">=1.5.3",
     "gulp-watch": ">=4.3.5",
     "jshint": ">=2.9.4",
+    "uglify-js-es6": "^2.8.9",
     "yarg": ">=1.0.8"
   },
   "keywords": [
