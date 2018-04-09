@@ -46,8 +46,8 @@ window.onload = function() {
         }
     });
 
-    checkTrainingStatus();
-    setInterval(checkTrainingStatus, 30000);
+    // checkTrainingStatus();
+    // setInterval(checkTrainingStatus, 30000);
 }
 
 function checkTrainingStatus () {
@@ -228,10 +228,12 @@ function refreshImgList() {
 
     fetch('getImglist', postBody).then(e => e.json()).then(data => {
         let tmp = "";
+        LIST = data.label;
         if(data.imgList.length) {
             tmp = data.imgList.map(datum => {
-                return `<li class="list-group-item qiniu-tm-listitem-choose ${(datum == data.tmpName)?'list-group-item-success':''}" data-filename="${datum || ''}">
-                            ${datum} ${(datum == data.tmpName)?'（标准模版）':''}
+                let filelist = data.label.map(e => e.fileName);
+                return `<li class="list-group-item qiniu-tm-listitem-choose ${(filelist.indexOf(datum)>-1)?'list-group-item-success':''}" data-filename="${datum || ''}">
+                            ${datum} ${(filelist.indexOf(datum)>-1)?'（已标注）':''}
                             <button type="button" class="close" aria-label="Close">
                                 <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
                             </button>
@@ -266,41 +268,21 @@ function refreshImgList() {
 
         document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
             let fileName = e.target.dataset.filename;
-            if(e.target.getAttribute('class').indexOf('list-group-item-success') > -1){
-                let postBody = {
-                    headers: { 
-                        "Content-Type": "application/json"
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({'fileName': document.querySelector('#qiniu_tm_chooseclass').value})
-                }
-    
-                fetch('getdetail', postBody).then(e => e.json()).then(e => {
-                    e.data.forEach(e => DATA.push(e));
-                    let imgURL = '/file/imgs/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
-                    document.querySelector('#qiniu_tm_img').src = imgURL;
-                    let promise = labeltool.init(imgURL);
-                    promise.then(e => {
-                        let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
-                        let imgContainer = document.querySelector('#qiniu_tm_img');
-                        svgContainer.style.height = imgContainer.clientHeight;
-                        labeltool.inputBBox(DATA)
-                    });
-                });
-            } else {
-                let imgURL = '/file/imgs/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
-                document.querySelector('#qiniu_tm_img').src = imgURL;
-                let promise = labeltool.init(imgURL);
-                promise.then(e => {
-                    let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
-                    let imgContainer = document.querySelector('#qiniu_tm_img');
-                    svgContainer.style.height = imgContainer.clientHeight;
-                    labeltool.inputBBox(DATA)
-                });
+            let datum = LIST.filter(datum => datum.fileName == fileName);
+            if(datum.length !== 0){
+                datum[0].data.forEach(e => DATA.push(e));
             }
+            let imgURL = '/file/imgs/' + document.querySelector('#qiniu_tm_chooseclass').value + '/' + fileName;
+            document.querySelector('#qiniu_tm_img').src = imgURL;
+            let promise = labeltool.init(imgURL);
+            promise.then(e => {
+                let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
+                let imgContainer = document.querySelector('#qiniu_tm_img');
+                svgContainer.style.height = imgContainer.clientHeight;
+                labeltool.inputBBox(DATA)
+            });
             
             
-
             document.querySelector("#qiniu_tm_listcontainer").hidden = true;
             document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
             document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').removeAttribute('disabled');
@@ -348,112 +330,6 @@ function refreshSelector() {
     });
 }
 
-function loadPageServer () {
-    fetch('/getfilelist').then(e => e.json()).then(function(data) {
-        LIST = data;
-        let tmp = data.map(datum => {datum = datum.replace('.json', ''); return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
-                                            ${datum}
-                                            <button type="button" class="close" aria-label="Close">
-                                                <span aria-hidden="true" class="js-qiniu-tm-listitem-remove" data-filename="${datum || ''}">&times;</span>
-                                            </button>
-                                        </li>`});
-        document.querySelector('#qiniu_tm_listcontainer_list ul').innerHTML = tmp.join('');
-
-        document.querySelectorAll(".js-qiniu-tm-listitem-remove").forEach(ele => ele.addEventListener("click", function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            let conf = confirm("您确定要删除这个模版吗？");
-            if(conf == true) {
-                let postBody = {
-                    headers: { 
-                        "Content-Type": "application/json"
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({'fileName': e.target.dataset.filename})
-                }
-    
-                fetch('/removeseperate', postBody).then(function (response) {
-                    console.log('response: ', response);
-                    location.reload();
-                });
-            }
-        }));
-
-        document.querySelectorAll(".qiniu-tm-listitem-choose").forEach(ele => ele.addEventListener("click", function(e) {
-            let fileName = e.target.dataset.filename;
-            let postBody = {
-                headers: { 
-                    "Content-Type": "application/json"
-                },
-                method: 'POST',
-                body: JSON.stringify({'fileName': fileName})
-            }
-
-            fetch('getdetail', postBody).then(e => e.json()).then(e => {
-                e.data.forEach(e => DATA.push(e));
-                isNew = false;
-                document.querySelector('#qiniu_tm_templatename').value = fileName;
-                let imgURL = '/file/imgs/' + fileName + '.png';
-                document.querySelector('#qiniu_tm_img').src = imgURL;
-                let promise = labeltool.init(imgURL);
-
-                document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-                document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-                promise.then(e => labeltool.inputBBox(DATA));
-            });
-            // let ind = LIST.findIndex(e => e.fileName == fileName);
-            // if(ind > -1) {
-            //     LIST[ind].data.forEach(e => DATA.push(e));
-
-            //     isNew = false;
-            //     document.querySelector('#qiniu_tm_templatename').value = fileName.slice(0,-4);
-            //     document.querySelector('#qiniu_tm_img').src = '/file/imgs/' + fileName;
-            //     let promise = labeltool.init('/file/imgs/' + fileName);
-
-            //     document.querySelector("#qiniu_tm_listcontainer").hidden = true;
-            //     document.querySelector("#qiniu_tm_imgcontainer").hidden = false;
-
-            //     promise.then(e => labeltool.inputBBox(DATA));
-            // }
-        }));
-    });
-}
-
-// document.querySelector('#qiniu_tm_listcontainer_upload').addEventListener('click', function(e) {
-//     if(localStorage.data == undefined || localStorage.data.length == 0) return;
-//     let postBody = {
-//         headers: { 
-//             "Content-Type": "application/json"
-//         },
-//         method: 'POST',
-//         body: localStorage.data
-//     }
-
-//     fetch('/submit', postBody).then(function(response) {
-//         console.log(response.ok);
-//         if(response.ok) {
-//             let cls = document.querySelector('#qiniu_tm_success_alert').getAttribute('class').replace('qiniu-tm-hidden', '');
-//             document.querySelector('#qiniu_tm_success_alert').setAttribute('class', cls);
-//             setTimeout(function() {
-//                 let cls = document.querySelector('#qiniu_tm_success_alert').getAttribute('class') + 'qiniu-tm-hidden';
-//                 document.querySelector('#qiniu_tm_success_alert').setAttribute('class', cls);
-//             }, 1000);
-//             console.log('update success!');
-//         } else {
-//             let cls = document.querySelector('#qiniu_tm_fail_alert').getAttribute('class').replace('qiniu-tm-hidden', '');
-//             document.querySelector('#qiniu_tm_fail_alert').setAttribute('class', cls);
-//             setTimeout(function() {
-//                 let cls = document.querySelector('#qiniu_tm_fail_alert').getAttribute('class') + 'qiniu-tm-hidden';
-//                 document.querySelector('#qiniu_tm_fail_alert').setAttribute('class', cls);
-//             }, 1000);
-//             console.log('update failed!');
-//         }
-        
-//     }).catch(function(e) {
-//         console.log(e);
-//     });
-// });
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').addEventListener('click', function(e) {
     reloadLabelTool();
@@ -466,12 +342,25 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_cancel').addEventListener
 
 document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener('click', function(e) {
     let fileName = document.querySelector('#qiniu_tm_chooseclass').value;
+    let datum = {
+        'fileName': document.querySelector('#qiniu_tm_imgcontainer_title_filename').textContent,
+        'data': DATA
+    }
+    let temp = LIST.filter(e => e.fileName == fileName);
+    if(temp.length == 0) {
+        LIST.push(datum);
+    } else {
+        temp.data = DATA
+    }
     let postBody = {
         headers: { 
             "Content-Type": "application/json"
         },
         method: 'POST',
-        body: JSON.stringify({'fileName': fileName, 'tmpName': document.querySelector('#qiniu_tm_imgcontainer_title_filename').textContent, 'data': DATA})
+        body: JSON.stringify({
+            'fileName': fileName,
+            'data': LIST
+        })
     }
 
     fetch('/submit', postBody).then(function (response) {
