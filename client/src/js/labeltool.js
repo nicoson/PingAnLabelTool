@@ -107,15 +107,21 @@ class labelTool {
                 // <polygon points="200,10 250,190 160,210" style="fill:lime;stroke:purple;stroke-width:1"/>
                 let x = e.offsetX;
                 let y = e.offsetY;
-                let maxX = Math.max(this.startX, this.endX);
-                let minX = Math.min(this.startX, this.endX);
-                x = (x > (this.centerX + this.radius)) ? maxX : ((x < (this.centerX - this.radius)) ? minX : x);
+                // let maxX = Math.max(this.startX, this.endX);
+                // let minX = Math.min(this.startX, this.endX);
+                // x = (x > (this.centerX + this.radius)) ? maxX : ((x < (this.centerX - this.radius)) ? minX : x);
 
-                let y1 = this.centerY + Math.sqrt(this.radius**2 - (x - this.centerX)**2);
-                let y2 = this.centerY - Math.sqrt(this.radius**2 - (x - this.centerX)**2);
+                // let y1 = this.centerY + Math.sqrt(this.radius**2 - (x - this.centerX)**2);
+                // let y2 = this.centerY - Math.sqrt(this.radius**2 - (x - this.centerX)**2);
 
-                let midX = x;
-                let midY = (Math.abs(y1 - y) > Math.abs(y2 - y)) ? y2 : y1;
+                // let ox = (this.startX + this.endX) / 2;
+                // let oy = (this.startY + this.endY) / 2;
+
+                let l = Math.sqrt((x-this.centerX)**2 + (y-this.centerY)**2);
+
+
+                let midX = this.centerX + this.radius/l*(x - this.centerX);
+                let midY = this.centerY + this.radius/l*(y - this.centerY);
 
                 let midX2 = this.endX - (midX - this.startX);
                 let midY2 = this.endY - (midY - this.startY);
