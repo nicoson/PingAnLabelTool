@@ -73,10 +73,19 @@ router.post('/getImglist', function(req, res, next) {
     let file = fs.readdirSync('public/file/imgs/' + req.body.fileName);
     console.log(file);
     let conf = JSON.parse(fs.readFileSync('public/file/' + req.body.fileName + '.json'));
-    console.log(conf);
+    let list = [];
+    if(file.length != 0) {
+      for(let i in conf) {
+        console.log(conf[i].fileName);
+        if(file.indexOf(conf[i].fileName)>-1) {
+          list.push(conf[i]);
+        }
+      }
+    }
+    console.log(list);
     res.send({
       imgList: file,
-      label: conf
+      label: list
     });
   }
   res.send({
