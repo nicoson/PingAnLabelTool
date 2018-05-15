@@ -143,8 +143,16 @@ router.post('/deleteclass', function(req, res, next) {
 router.post('/submit', function(req, res, next) {
   console.log(req.body.fileName);
   let labelFileDir = 'public/file/' + req.body.fileName + '.json';
+  let file = JSON.parse(fs.readFileSync(labelFileDir));
 
-  fs.writeFileSync(labelFileDir, JSON.stringify(req.body.data), 'utf8');
+  let ind = file.findIndex(e => e.fileName == req.body.data.fileName);
+  if(ind == -1){
+    file.push(req.body.data);
+  } else {
+    file[ind] = req.body.data;
+  }
+
+  fs.writeFileSync(labelFileDir, JSON.stringify(file), 'utf8');
   res.send('success');
 });
 
