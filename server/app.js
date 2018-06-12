@@ -22,6 +22,13 @@ app.use(bodyParser.urlencoded({ extended: false ,limit: '50mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.all('*',function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, RequestVerificationToken, Accept, X-Requested-With, yourHeaderFeild');
+  res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+  next();
+});
+
 app.use('/', index);
 app.use('/users', users);
 

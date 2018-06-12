@@ -22,6 +22,7 @@ let LIST = null;
 let CURRENT = 0;
 let currentFolder = null;
 let isNew = true;
+let HOST = 'http://localhost:3000';
 
 window.onload = function() {
     let svgContainer = document.querySelector('#qiniu_tm_imgmarker');
@@ -35,7 +36,7 @@ window.onload = function() {
 }
 
 function loadPageServer () {
-    fetch('/getfilelist').then(e => e.json()).then(function(data) {
+    fetch(HOST + '/getfilelist').then(e => e.json()).then(function(data) {
         let tmp = data.map(datum => {
             datum = datum.replace('.json', '');
             return `<li class="list-group-item qiniu-tm-listitem-choose" data-filename="${datum || ''}">
@@ -55,7 +56,7 @@ function loadPageServer () {
             }
             currentFolder = fileName;
 
-            fetch('getImgList', postBody).then(e => e.json()).then(imgList => {
+            fetch(HOST + '/getImgList', postBody).then(e => e.json()).then(imgList => {
                 LIST = imgList;
                 CURRENT = 0;
 
@@ -80,7 +81,7 @@ function loadImgPage() {
     document.querySelector("#qiniu_tm_contentfiller").innerHTML = "";
     let datum = LIST[CURRENT]
     datum.data.forEach(e => DATA.push(e));
-    let imgURL = datum.url;
+    let imgURL = HOST + datum.url;
     document.querySelector('#qiniu_tm_img').src = imgURL;
     let promise = labeltool.init(imgURL);
 
@@ -185,6 +186,17 @@ document.querySelector('#qiniu_tm_detailpanel_btngroup_submit').addEventListener
     saveResult();
 });
 
+document.querySelector('body').addEventListener('keydown', function(e) {
+    console.log(e);
+    if (document.querySelector('#qiniu_tm_imgcontainer').getAttribute('hidden') == null) {
+        if (e.key == 'ArrowLeft') {
+            document.querySelector('#qiniu_tm_imgnav_previous').click();
+        } else if(e.key == 'ArrowRight') {
+            document.querySelector('#qiniu_tm_imgnav_next').click();
+        }
+    }
+});
+
 function saveResult() {
     if(LIST == null) return;
 
@@ -197,7 +209,7 @@ function saveResult() {
         body: JSON.stringify({data: LIST, folder: currentFolder})
     }
 
-    fetch('/submit', postBody).then(function (response) {
+    fetch(HOST + '/submit', postBody).then(function (response) {
         console.log('response: ', response);
     });
 }
