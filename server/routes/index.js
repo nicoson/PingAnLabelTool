@@ -87,11 +87,12 @@ router.post('/getImglist', function(req, res, next) {
       imgList: file,
       label: list
     });
+  } else {
+    res.send({
+      imgList: [],
+      label: []
+    });
   }
-  res.send({
-    imgList: [],
-    label: []
-  });
 });
 
 router.post('/getdetail', function(req, res, next) {
