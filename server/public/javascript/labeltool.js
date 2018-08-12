@@ -142,7 +142,7 @@ class labelTool {
                 let outputdata = {
                     id: this.count,
                     node: this.currentNode.cloneNode(true),
-                    bbox: this.currentNode.getAttribute('points').split(' ').map(e => e.split(',')).map(e => e.map(e => e*this.stretchRate)),
+                    bbox: this.calculateClockWise(this.currentNode.getAttribute('points').split(' ').map(e => e.split(',')).map(e => e.map(e => e*this.stretchRate))),
                     isKey: false
                 }
                 this.datalist.push(outputdata);
@@ -177,6 +177,25 @@ class labelTool {
             this.svgContainer.appendChild(tempNode);
             datum.node = tempNode;
         }.bind(this));
+    }
+
+    calculateClockWise(bbox) {
+        let delta_X_01 = bbox[1][0] - bbox[0][0];
+        let delta_Y_01 = -(bbox[1][1] - bbox[0][1]);
+        let hypotenuse_01 = Math.sqrt(delta_X_01**2 + delta_Y_01**2);
+        let sin01 = delta_Y_01 / hypotenuse_01;
+        let cos01 = delta_X_01 / hypotenuse_01;
+
+        let delta_X_02 = bbox[2][0] - bbox[0][0];
+        let delta_Y_02 = -(bbox[2][1] - bbox[0][1]);
+        let hypotenuse_02 = Math.sqrt(delta_X_02**2 + delta_Y_02**2);
+        let sin02 = delta_Y_02 / hypotenuse_02;
+        let cos02 = delta_X_02 / hypotenuse_02;
+
+        let sin0102 = sin01*cos02 - cos01*sin02
+        if (sin0102 < 0) {
+            return [bbox[0], bbox[2], bbox[1], bbox[3]];
+        }
     }
 }
         
