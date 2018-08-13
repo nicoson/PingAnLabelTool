@@ -195,6 +195,8 @@ class labelTool {
         let sin0102 = sin01*cos02 - cos01*sin02
         if (sin0102 < 0) {
             return [bbox[0], bbox[2], bbox[1], bbox[3]];
+        } else {
+            return bbox;
         }
     }
 }
