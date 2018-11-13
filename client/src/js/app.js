@@ -190,8 +190,10 @@ document.querySelector('body').addEventListener('keydown', function(e) {
     console.log(e);
     if (document.querySelector('#qiniu_tm_imgcontainer').getAttribute('hidden') == null) {
         if (e.key == 'ArrowLeft') {
+            document.querySelector('#qiniu_tm_imgnav_previous').focus();    // trigger blue to save current cell
             document.querySelector('#qiniu_tm_imgnav_previous').click();
         } else if(e.key == 'ArrowRight') {
+            document.querySelector('#qiniu_tm_imgnav_next').focus();    // trigger blue to save current cell
             document.querySelector('#qiniu_tm_imgnav_next').click();
         }
     }
